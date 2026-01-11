@@ -1,5 +1,4 @@
 alert("Script.js loaded");
-
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
@@ -57,9 +56,28 @@ document.addEventListener("DOMContentLoaded", () => {
         signature: signature
       });
 
+      // Confirmation popup
       alert(`Job Saved Successfully!\nJob ID: ${jobId}`);
 
       form.reset();
+
+      // ---------------- WhatsApp Free Click-to-Chat ----------------
+      const message = encodeURIComponent(
+`RightClick Computer Sales & Service Center
+
+Your device has been received successfully.
+Job ID: ${jobId}
+Thank you for choosing us!`
+      );
+
+      // Your WhatsApp number (personal)
+      const whatsappNumber = "919059895427"; // 91 + your number
+
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, "_blank");
+      // ----------------------------------------------------------------
 
     } catch (error) {
       console.error("Error saving job:", error);
@@ -67,4 +85,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
