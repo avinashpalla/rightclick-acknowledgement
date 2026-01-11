@@ -32,8 +32,9 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
@@ -49,6 +50,7 @@ const db = getFirestore(app);
 const jobsBody = document.getElementById("jobsBody");
 const searchInput = document.getElementById("searchInput");
 
+// Load jobs from Firestore
 async function loadJobs() {
   jobsBody.innerHTML = "";
   const querySnapshot = await getDocs(collection(db, "jobs"));
@@ -76,6 +78,7 @@ async function loadJobs() {
   });
 }
 
+// Update job status
 window.updateStatus = async function(docId) {
   const select = document.getElementById(`select-${docId}`);
   const newStatus = select.value;
@@ -83,6 +86,29 @@ window.updateStatus = async function(docId) {
   await updateDoc(docRef, { status: newStatus });
   document.getElementById(`status-${docId}`).innerText = newStatus;
   alert("Status updated to: " + newStatus);
+
+  // ---------------- WhatsApp notification for Received ----------------
+  if(newStatus === "Received") {
+    const jobDoc = await getDoc(docRef);
+    const job = jobDoc.data();
+
+    const message = encodeURIComponent(
+`RightClick Computer Sales & Service Center
+
+Your device has been received successfully.
+Job ID: ${job.jobId}
+Thank you for choosing us!`
+    );
+
+    let customerNumber = job.mobile;
+    if (!customerNumber.startsWith("91")) {
+      customerNumber = "91" + customerNumber; // Add India country code
+    }
+
+    const whatsappUrl = `https://wa.me/${customerNumber}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  }
+  // ----------------------------------------------------------------------
 }
 
 // Search functionality
