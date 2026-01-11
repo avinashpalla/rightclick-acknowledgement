@@ -13,14 +13,16 @@
 
   <form>
 
+  <form id="jobForm">
+
   <label>Customer Name</label>
-  <input type="text" placeholder="Customer Name" required>
+  <input type="text" id="customerName" required>
 
   <label>Mobile Number</label>
-  <input type="tel" placeholder="Mobile Number" required>
+  <input type="tel" id="mobile" required>
 
   <label>Item Submitted</label>
-  <select>
+  <select id="item">
     <option>Laptop</option>
     <option>Desktop / CPU</option>
     <option>Printer</option>
@@ -31,21 +33,22 @@
 
   <h4>Accessories Received</h4>
 
-  <label><input type="checkbox"> Adapter</label><br>
-  <label><input type="checkbox"> Power Cable</label><br>
-  <label><input type="checkbox"> HDMI / VGA Cable</label><br>
-  <label><input type="checkbox"> Mouse</label><br>
-  <label><input type="checkbox"> Keyboard</label>
+  <label><input type="checkbox" id="adapter"> Adapter</label><br>
+  <label><input type="checkbox" id="power"> Power Cable</label><br>
+  <label><input type="checkbox" id="hdmi"> HDMI / VGA Cable</label><br>
+  <label><input type="checkbox" id="mouse"> Mouse</label><br>
+  <label><input type="checkbox" id="keyboard"> Keyboard</label>
 
   <label>Other Items (if any)</label>
-  <input type="text" placeholder="Other items">
+  <input type="text" id="otherItems">
 
   <label>Problem Reported</label>
-  <textarea placeholder="Describe the problem" rows="4"></textarea>
+  <textarea id="problem" rows="4"></textarea>
 
   <button type="submit">Generate Acknowledgement</button>
 
 </form>
+
 <script type="module" src="script.js"></script>
 </body>
 </html>
