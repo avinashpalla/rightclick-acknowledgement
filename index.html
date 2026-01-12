@@ -4,50 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RightClick Customer Acknowledgement</title>
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
-  body { background-color: #f5f8fb; color: #333; }
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
+body { background-color: #f5f8fb; color: #333; }
 
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #003366;
-    padding: 20px;
-    color: #fff;
-    flex-wrap: wrap;
-  }
-  header img { height: 60px; margin-right: 20px; }
-  header div { text-align: center; }
-  header h1 { margin-bottom: 5px; font-size: 24px; }
-  header p { margin: 0; font-size: 16px; color: #ffd700; }
+/* --- Header --- */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #003366;
+  padding: 20px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+header img { height: 60px; margin-right: 20px; }
+header div { text-align: center; }
+header h1 { margin-bottom: 5px; font-size: 24px; }
+header p { margin: 0; font-size: 16px; color: #ffd700; }
 
-  main { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+/* --- Main Form --- */
+main { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+h2 { text-align: center; margin-bottom: 20px; color: #003366; }
+form label { display: block; margin: 15px 0 5px; font-weight: 500; }
+input[type="text"], input[type="tel"], select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: 0.3s;
+}
+input:focus, select:focus, textarea:focus { border-color: #003366; outline: none; }
+.accessories { display: flex; flex-wrap: wrap; gap: 10px; margin: 5px 0 15px; }
+.accessories label { flex: 1 1 45%; }
+button { background-color: #003366; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition:0.3s; }
+button:hover { background-color: #0055aa; }
 
-  h2 { text-align: center; margin-bottom: 20px; color: #003366; }
-  form label { display: block; margin: 15px 0 5px; font-weight: 500; }
-  input[type="text"], input[type="tel"], select, textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 15px;
-    transition: 0.3s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: #003366; outline: none; }
+/* --- Popup Modal --- */
+#popup {
+  display: none;
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+.popup-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  animation: fadeIn 0.4s ease;
+}
+.popup-content h3 { color:#003366; margin-bottom:15px; }
+.popup-content p { margin:5px 0; }
+.popup-content .badge { display:inline-block; padding:5px 12px; border-radius:12px; color:#fff; background:#007bff; font-weight:500; margin:10px 0; }
+.popup-content button { margin-top:15px; background-color:#ffd700; color:#003366; font-weight:700; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
 
-  .accessories { display: flex; flex-wrap: wrap; gap: 10px; margin: 5px 0 15px; }
-  .accessories label { flex: 1 1 45%; }
-
-  button { background-color: #003366; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.3s; }
-  button:hover { background-color: #0055aa; }
-
-  @media(max-width:500px){
-    header img { margin-bottom:10px; }
-    header div { text-align: center; }
-  }
+/* --- Responsive --- */
+@media(max-width:500px){ header img { margin-bottom:10px; } header div { text-align:center; } }
 </style>
 </head>
 <body>
@@ -99,6 +123,21 @@
 </form>
 </main>
 
+<!-- Popup -->
+<div id="popup">
+  <div class="popup-content">
+    <img src="logo.png" alt="Logo" style="height:50px; margin-bottom:10px;">
+    <h3>Acknowledgement Created!</h3>
+    <p><strong>Job ID:</strong> <span id="popupJobId"></span></p>
+    <p><strong>Customer:</strong> <span id="popupCustomer"></span></p>
+    <p><strong>Item:</strong> <span id="popupItem"></span></p>
+    <span class="badge">Received</span>
+    <br>
+    <button onclick="printReceipt()">Print Acknowledgement</button>
+    <button onclick="closePopup()" style="margin-left:10px;">Close</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
@@ -116,10 +155,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const form = document.getElementById("jobForm");
+const popup = document.getElementById("popup");
+const popupJobId = document.getElementById("popupJobId");
+const popupCustomer = document.getElementById("popupCustomer");
+const popupItem = document.getElementById("popupItem");
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const data = {
+  const jobData = {
     customerName: document.getElementById("customerName").value,
     mobile: document.getElementById("mobile").value,
     item: document.getElementById("item").value,
@@ -137,10 +181,28 @@ form.addEventListener("submit", async (e) => {
     jobId: "RC-" + Math.floor(Math.random()*90000+10000)
   };
 
-  await addDoc(collection(db, "jobs"), data);
-  alert("Acknowledgement Created! Job ID: " + data.jobId);
+  await addDoc(collection(db, "jobs"), jobData);
+
+  // Populate popup
+  popupJobId.innerText = jobData.jobId;
+  popupCustomer.innerText = jobData.customerName;
+  popupItem.innerText = jobData.item;
+
+  popup.style.display = "flex";
   form.reset();
 });
+
+// Popup functions
+function closePopup() { popup.style.display = "none"; }
+function printReceipt() {
+  const printContent = popup.querySelector(".popup-content").innerHTML;
+  const newWin = window.open('', '', 'width=500,height=600');
+  newWin.document.write('<html><head><title>Print Acknowledgement</title></head><body>'+printContent+'</body></html>');
+  newWin.document.close();
+  newWin.focus();
+  newWin.print();
+  newWin.close();
+}
 </script>
 
 </body>
