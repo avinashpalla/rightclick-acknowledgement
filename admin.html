@@ -3,57 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>RightClick Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#f2f5f9;
-      padding:20px;
-    }
-    h2,h3{
-      text-align:center;
-      color:#333;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin:15px 0;
-      border-radius:5px;
-      border:1px solid #ccc;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      background:#fff;
-      box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    }
-    th,td{
-      padding:10px;
-      text-align:center;
-      border-bottom:1px solid #ddd;
-    }
-    th{
-      background:#0a4cff;
-      color:white;
-    }
-    select,button{
-      padding:6px;
-      border-radius:4px;
-      border:1px solid #ccc;
-    }
-    button{
-      background:#0a4cff;
-      color:white;
-      cursor:pointer;
-    }
-    button:hover{
-      background:#083bd1;
-    }
-    .status-Received{color:#0066ff;font-weight:bold;}
-    .status-InProgress{color:#ff9800;font-weight:bold;}
-    .status-Ready{color:#2e7d32;font-weight:bold;}
-    .status-Delivered{color:#555;font-weight:bold;}
-  </style>
 </head>
 <body>
 
@@ -62,25 +13,34 @@
 
 <input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
 
-<table>
+<table border="1" id="jobsTable">
   <thead>
     <tr>
       <th>Job ID</th>
-      <th>Customer</th>
+      <th>Customer Name</th>
       <th>Mobile</th>
       <th>Item</th>
       <th>Status</th>
-      <th>Update</th>
+      <th>Update Status</th>
     </tr>
   </thead>
-  <tbody id="jobsBody"></tbody>
+  <tbody id="jobsBody">
+    <!-- Jobs will appear here -->
+  </tbody>
 </table>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { 
+  getFirestore,
+  collection,
+  doc,
+  updateDoc,
+  getDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
@@ -96,94 +56,102 @@ const db = getFirestore(app);
 const jobsBody = document.getElementById("jobsBody");
 const searchInput = document.getElementById("searchInput");
 
-async function loadJobs() {
-  jobsBody.innerHTML = "";
-  const snap = await getDocs(collection(db,"jobs"));
+/* ---------------- REALTIME LOADING ---------------- */
+function loadJobsRealtime() {
+  onSnapshot(collection(db, "jobs"), (snapshot) => {
+    jobsBody.innerHTML = "";
 
-  snap.forEach(docSnap=>{
-    const job = docSnap.data();
-    const tr = document.createElement("tr");
+    snapshot.forEach((docSnap) => {
+      const job = docSnap.data();
+      const row = document.createElement("tr");
 
-    tr.innerHTML = `
-      <td>${job.jobId}</td>
-      <td>${job.customerName}</td>
-      <td>${job.mobile}</td>
-      <td>${job.item}</td>
-      <td id="status-${docSnap.id}" class="status-${job.status.replace(" ","")}">${job.status}</td>
-      <td>
-        <select id="select-${docSnap.id}">
-          <option ${job.status==="Received"?"selected":""}>Received</option>
-          <option ${job.status==="In Progress"?"selected":""}>In Progress</option>
-          <option ${job.status==="Ready"?"selected":""}>Ready</option>
-          <option ${job.status==="Delivered"?"selected":""}>Delivered</option>
-        </select>
-        <button onclick="updateStatus('${docSnap.id}')">Update</button>
-      </td>
-    `;
-    jobsBody.appendChild(tr);
+      row.innerHTML = `
+        <td>${job.jobId}</td>
+        <td>${job.customerName}</td>
+        <td>${job.mobile}</td>
+        <td>${job.item}</td>
+        <td id="status-${docSnap.id}">${job.status}</td>
+        <td>
+          <select id="select-${docSnap.id}">
+            <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
+            <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
+            <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
+            <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
+          </select>
+          <button onclick="updateStatus('${docSnap.id}')">Update</button>
+        </td>
+      `;
+      jobsBody.appendChild(row);
+    });
   });
 }
 
-window.updateStatus = async function(docId){
+/* ---------------- UPDATE STATUS + WHATSAPP ---------------- */
+window.updateStatus = async function(docId) {
   const select = document.getElementById(`select-${docId}`);
   const newStatus = select.value;
-  const docRef = doc(db,"jobs",docId);
+  const docRef = doc(db, "jobs", docId);
 
-  await updateDoc(docRef,{status:newStatus});
+  await updateDoc(docRef, { status: newStatus });
   document.getElementById(`status-${docId}`).innerText = newStatus;
 
-  const jobSnap = await getDoc(docRef);
-  const job = jobSnap.data();
+  const jobDoc = await getDoc(docRef);
+  const job = jobDoc.data();
 
-  let message="";
+  let message = "";
 
-  if(newStatus==="Received"){
-    message=`RightClick Computer Sales & Service Center
+  if (newStatus === "Received") {
+    message = `RightClick Computer Sales & Service Center
 
 Your device has been received successfully.
 Job ID: ${job.jobId}`;
   }
-  else if(newStatus==="In Progress"){
-    message=`RightClick Computer Sales & Service Center
+  else if (newStatus === "In Progress") {
+    message = `RightClick Computer Sales & Service Center
 
-Your device service is in progress.
+Your device is currently under service.
 Job ID: ${job.jobId}`;
   }
-  else if(newStatus==="Ready"){
-    message=`RightClick Computer Sales & Service Center
+  else if (newStatus === "Ready") {
+    message = `RightClick Computer Sales & Service Center
 
-Your device is ready for delivery.
+Your device is ready for pickup.
 Job ID: ${job.jobId}
 Please visit our store.`;
   }
-  else if(newStatus==="Delivered"){
-    message=`RightClick Computer Sales & Service Center
+  else if (newStatus === "Delivered") {
+    message = `RightClick Computer Sales & Service Center
 
-Your device has been delivered.
+Your device has been delivered successfully.
 Job ID: ${job.jobId}
-Thank you for choosing us.`;
+Thank you for choosing RightClick.`;
   }
 
-  if(message!==""){
-    let num = job.mobile;
-    if(!num.startsWith("91")) num="91"+num;
-    const url=`https://wa.me/${num}?text=${encodeURIComponent(message)}`;
-    window.open(url,"_blank");
+  if (message !== "") {
+    let customerNumber = job.mobile;
+    if (!customerNumber.startsWith("91")) {
+      customerNumber = "91" + customerNumber;
+    }
+
+    const whatsappUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
   }
 
-  alert("Status updated: "+newStatus);
-}
+  alert("Status updated to: " + newStatus);
+};
 
-searchInput.addEventListener("input",()=>{
+/* ---------------- SEARCH ---------------- */
+searchInput.addEventListener("input", () => {
   const filter = searchInput.value.toLowerCase();
   const rows = jobsBody.getElementsByTagName("tr");
-  for(let r of rows){
-    const txt = r.innerText.toLowerCase();
-    r.style.display = txt.includes(filter) ? "" : "none";
+  for (let i = 0; i < rows.length; i++) {
+    const text = rows[i].innerText.toLowerCase();
+    rows[i].style.display = text.includes(filter) ? "" : "none";
   }
 });
 
-loadJobs();
+/* Start realtime listener */
+loadJobsRealtime();
 </script>
 
 </body>
