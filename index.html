@@ -187,9 +187,23 @@ form.addEventListener("submit", async (e) => {
   popupJobId.innerText = jobData.jobId;
   popupCustomer.innerText = jobData.customerName;
   popupItem.innerText = jobData.item;
-
   popup.style.display = "flex";
   form.reset();
+
+  // -------- WhatsApp auto-send --------
+  let customerNumber = jobData.mobile.trim();
+  if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber; // India country code
+  const message = encodeURIComponent(
+`RightClick Computer Sales & Service Center
+Your device has been received successfully.
+Job ID: ${jobData.jobId}
+Customer: ${jobData.customerName}
+Item: ${jobData.item}
+Status: Received
+Thank you for choosing us!`
+  );
+  const whatsappUrl = `https://wa.me/${customerNumber}?text=${message}`;
+  window.open(whatsappUrl, "_blank");
 });
 
 // Popup functions
