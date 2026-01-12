@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RightClick Customer Acknowledgement</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
 * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
 body { background-color: #f5f8fb; color: #333; }
@@ -119,6 +121,9 @@ button:hover { background-color: #0055aa; }
   <label for="problem">Problem Reported</label>
   <textarea id="problem" rows="4"></textarea>
 
+  <label for="jobDate">Select Job Date</label>
+  <input type="text" id="jobDate" placeholder="Click to select date" required>
+
   <button type="submit">Generate Acknowledgement</button>
 </form>
 </main>
@@ -131,12 +136,16 @@ button:hover { background-color: #0055aa; }
     <p><strong>Job ID:</strong> <span id="popupJobId"></span></p>
     <p><strong>Customer:</strong> <span id="popupCustomer"></span></p>
     <p><strong>Item:</strong> <span id="popupItem"></span></p>
+    <p><strong>Date:</strong> <span id="popupDate"></span></p>
     <span class="badge">Received</span>
     <br>
     <button onclick="printReceipt()">Print Acknowledgement</button>
     <button onclick="closePopup()" style="margin-left:10px;">Close</button>
   </div>
 </div>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -159,6 +168,16 @@ const popup = document.getElementById("popup");
 const popupJobId = document.getElementById("popupJobId");
 const popupCustomer = document.getElementById("popupCustomer");
 const popupItem = document.getElementById("popupItem");
+const popupDate = document.getElementById("popupDate");
+
+// Initialize Flatpickr
+flatpickr("#jobDate", {
+    dateFormat: "d-m-Y",
+    defaultDate: "today",
+    altInput: true,
+    altFormat: "F j, Y",
+    allowInput: true
+});
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -177,6 +196,7 @@ form.addEventListener("submit", async (e) => {
     otherItems: document.getElementById("otherItems").value,
     problem: document.getElementById("problem").value,
     status: "Received",
+    date: document.getElementById("jobDate").value,  // selected date
     timestamp: serverTimestamp(),
     jobId: "RC-" + Math.floor(Math.random()*90000+10000)
   };
@@ -187,18 +207,20 @@ form.addEventListener("submit", async (e) => {
   popupJobId.innerText = jobData.jobId;
   popupCustomer.innerText = jobData.customerName;
   popupItem.innerText = jobData.item;
+  popupDate.innerText = jobData.date;
   popup.style.display = "flex";
   form.reset();
 
   // -------- WhatsApp auto-send --------
   let customerNumber = jobData.mobile.trim();
-  if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber; // India country code
+  if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber;
   const message = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 Your device has been received successfully.
 Job ID: ${jobData.jobId}
 Customer: ${jobData.customerName}
 Item: ${jobData.item}
+Date: ${jobData.date}
 Status: Received
 Thank you for choosing us!`
   );
