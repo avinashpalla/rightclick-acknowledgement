@@ -2,63 +2,92 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RightClick Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-* { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
-body { background-color: #f5f8fb; color: #333; }
-h2, h3 { text-align:center; margin:15px 0; }
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',sans-serif}
+body{background:#f5f8fb;color:#333}
 
 /* Header */
-header {
-  display:flex; align-items:center; justify-content:center;
-  background-color:#003366; padding:20px; color:#fff; flex-wrap:wrap;
+header{
+  background:#003366;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  flex-wrap:wrap
 }
-header img { height:60px; margin-right:20px; }
-header div { text-align:center; }
-header h1 { margin-bottom:5px; font-size:24px; }
-header p { margin:0; font-size:16px; color:#ffd700; }
+header img{height:60px;margin-right:15px}
+header h1{font-size:24px}
+header p{color:#ffd700;font-size:15px}
 
 /* Search */
-.search-container { text-align:center; margin:20px 0; }
-#searchInput {
-  width:90%; max-width:400px; padding:10px 15px;
-  font-size:16px; border-radius:8px; border:1px solid #ccc;
-  transition:0.3s;
+.search-container{text-align:center;margin:20px}
+#searchInput{
+  width:90%;max-width:400px;
+  padding:10px;border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px
 }
-#searchInput:focus { border-color:#003366; outline:none; }
+#searchInput:focus{outline:none;border-color:#003366}
 
-/* Job Cards */
-#jobsContainer {
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
-  gap:15px; padding:0 20px 40px 20px;
+/* Cards */
+#jobsContainer{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:15px;
+  padding:0 20px 40px
 }
-.job-card {
-  background-color:#fff; padding:20px; border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:0.3s;
+.job-card{
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  transition:.3s
 }
-.job-card:hover { transform:translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
-.job-card h4 { margin-bottom:10px; color:#003366; }
-.job-card p { margin:5px 0; }
-.status-badge {
-  display:inline-block; padding:5px 10px; border-radius:12px;
-  color:#fff; font-weight:500; font-size:14px;
-}
-.Received { background-color:#007bff; }
-.In-Progress { background-color:#ffc107; color:#333; }
-.Ready { background-color:#28a745; }
-.Delivered { background-color:#6c757d; }
+.job-card:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,.15)}
+.job-card h4{color:#003366;margin-bottom:10px}
 
-.status-select { padding:5px 10px; border-radius:8px; border:1px solid #ccc; margin-right:10px; }
-.update-btn { padding:6px 12px; border:none; border-radius:8px; background-color:#003366; color:#fff; cursor:pointer; transition:0.3s; }
-.update-btn:hover { background-color:#0055aa; }
+/* Status Badge */
+.status-badge{
+  padding:4px 10px;
+  border-radius:12px;
+  color:#fff;
+  font-size:14px;
+  font-weight:500
+}
+.Received{background:#007bff}
+.In-Progress{background:#ffc107;color:#333}
+.Ready{background:#28a745}
+.Delivered{background:#6c757d}
+
+/* Controls */
+.status-select{
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #ccc
+}
+.update-btn{
+  padding:7px 12px;
+  border:none;
+  background:#003366;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
+  margin-left:6px
+}
+.update-btn:hover{background:#0055aa}
 </style>
 </head>
+
 <body>
 
 <header>
-  <img src="logo.png" alt="RightClick Logo">
+  <img src="logo.png">
   <div>
     <h1>RightClick Computer Sales & Service Center</h1>
     <p>Professional Device Service Management</p>
@@ -66,99 +95,123 @@ header p { margin:0; font-size:16px; color:#ffd700; }
 </header>
 
 <div class="search-container">
-  <input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
+  <input id="searchInput" placeholder="Search by Job ID or Customer Name">
 </div>
 
 <div id="jobsContainer"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
-  authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+const firebaseConfig={
+ apiKey:"AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+ authDomain:"rightclick-service-center.firebaseapp.com",
+ projectId:"rightclick-service-center",
+ storageBucket:"rightclick-service-center.firebasestorage.app",
+ messagingSenderId:"558210394752",
+ appId:"1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-const jobsContainer = document.getElementById("jobsContainer");
-const searchInput = document.getElementById("searchInput");
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
-async function loadJobs() {
-  jobsContainer.innerHTML = "";
-  const querySnapshot = await getDocs(collection(db, "jobs"));
-  querySnapshot.forEach(docSnap => {
-    const job = docSnap.data();
-    const card = document.createElement("div");
-    card.className = "job-card";
+const jobsContainer=document.getElementById("jobsContainer");
+const searchInput=document.getElementById("searchInput");
 
-    const statusClass = job.status.replace(/\s/g, "-"); // Replace spaces with hyphen for CSS class
+/* Load Jobs */
+async function loadJobs(){
+ jobsContainer.innerHTML="";
+ const qs=await getDocs(collection(db,"jobs"));
+ qs.forEach(docSnap=>{
+  const job=docSnap.data();
+  const card=document.createElement("div");
+  card.className="job-card";
 
-    card.innerHTML = `
-      <h4>${job.jobId}</h4>
-      <p><strong>Customer:</strong> ${job.customerName}</p>
-      <p><strong>Mobile:</strong> ${job.mobile}</p>
-      <p><strong>Item:</strong> ${job.item}</p>
-      <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${job.status}</span></p>
-      <div>
-        <select class="status-select" id="select-${docSnap.id}">
-          <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
-          <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
-          <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
-          <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
-        </select>
-        <button class="update-btn" onclick="updateStatus('${docSnap.id}')">Update</button>
-      </div>
-    `;
-    jobsContainer.appendChild(card);
-  });
+  const statusClass=job.status.replace(/\s/g,"-");
+
+  card.innerHTML=`
+  <h4>Job ID: ${job.jobId}</h4>
+  <p><b>Customer:</b> ${job.customerName}</p>
+  <p><b>Mobile:</b> ${job.mobile}</p>
+  <p><b>Item:</b> ${job.item}</p>
+  <p><b>Status:</b> 
+     <span class="status-badge ${statusClass}">${job.status}</span>
+  </p>
+  <div style="margin-top:10px">
+    <select class="status-select" id="select-${docSnap.id}">
+      <option ${job.status=="Received"?"selected":""}>Received</option>
+      <option ${job.status=="In Progress"?"selected":""}>In Progress</option>
+      <option ${job.status=="Ready"?"selected":""}>Ready</option>
+      <option ${job.status=="Delivered"?"selected":""}>Delivered</option>
+    </select>
+    <button class="update-btn" onclick="updateStatus('${docSnap.id}')">Update</button>
+  </div>`;
+  jobsContainer.appendChild(card);
+ });
 }
+loadJobs();
 
-window.updateStatus = async function(docId) {
-  const select = document.getElementById(`select-${docId}`);
-  const newStatus = select.value;
-  const docRef = doc(db, "jobs", docId);
-  await updateDoc(docRef, { status: newStatus });
+/* Update Status + WhatsApp */
+window.updateStatus=async function(id){
+ const select=document.getElementById(`select-${id}`);
+ const newStatus=select.value;
+ const ref=doc(db,"jobs",id);
 
-  const card = select.closest(".job-card");
-  const badge = card.querySelector(".status-badge");
-  badge.innerText = newStatus;
-  badge.className = "status-badge " + newStatus.replace(/\s/g, "-");
+ await updateDoc(ref,{status:newStatus});
 
-  alert("Status updated to: " + newStatus);
+ const card=select.closest(".job-card");
+ const badge=card.querySelector(".status-badge");
+ badge.textContent=newStatus;
+ badge.className="status-badge "+newStatus.replace(/\s/g,"-");
 
-  if(newStatus==="Received") {
-    const jobDoc = await getDoc(docRef);
-    const job = jobDoc.data();
-    const message = encodeURIComponent(
+ const jobSnap=await getDoc(ref);
+ const job=jobSnap.data();
+
+ let receivedTime="Not Available";
+ if(job.receivedDate && job.receivedDate.toDate){
+   const d=job.receivedDate.toDate();
+   receivedTime=d.toLocaleString("en-IN",{
+     day:"2-digit",month:"short",year:"numeric",
+     hour:"2-digit",minute:"2-digit",hour12:true
+   });
+ }
+
+ const message=encodeURIComponent(
 `RightClick Computer Sales & Service Center
-Your device has been received successfully.
+
+Hello ${job.customerName},
+
+Your device status has been updated.
+
 Job ID: ${job.jobId}
-Thank you for choosing us!`
-    );
-    let customerNumber = job.mobile;
-    if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber;
-    window.open(`https://wa.me/${customerNumber}?text=${message}`, "_blank");
-  }
+Item: ${job.item}
+Current Status: ${newStatus}
+
+Received On:
+${receivedTime}
+
+Thank you for trusting RightClick.`
+ );
+
+ let mobile=job.mobile.toString();
+ if(!mobile.startsWith("91")) mobile="91"+mobile;
+
+ window.open(`https://wa.me/${mobile}?text=${message}`,"_blank");
+ alert("Status updated & WhatsApp sent!");
 };
 
-// Search
-searchInput.addEventListener("input", ()=>{
-  const filter = searchInput.value.toLowerCase();
-  const cards = jobsContainer.getElementsByClassName("job-card");
-  Array.from(cards).forEach(card=>{
-    const customer = card.querySelector("p:nth-of-type(1)").textContent.toLowerCase();
-    const jobId = card.querySelector("h4").textContent.toLowerCase();
-    card.style.display = (customer.includes(filter) || jobId.includes(filter)) ? "" : "none";
-  });
+/* Search */
+searchInput.addEventListener("input",()=>{
+ const val=searchInput.value.toLowerCase();
+ const cards=document.getElementsByClassName("job-card");
+ Array.from(cards).forEach(c=>{
+  const txt=c.textContent.toLowerCase();
+  c.style.display=txt.includes(val)?"":"none";
+ });
 });
-
-loadJobs();
 </script>
+
 </body>
 </html>
