@@ -6,72 +6,57 @@
 <title>RightClick Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
-  body { background-color: #f5f8fb; color: #333; }
-  h2, h3 { text-align: center; margin: 15px 0; }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #003366;
-    padding: 20px;
-    color: #fff;
-    flex-wrap: wrap;
-  }
-  header img { height: 60px; margin-right: 20px; }
-  header div { text-align: center; }
-  header h1 { margin-bottom: 5px; font-size: 24px; }
-  header p { margin: 0; font-size: 16px; color: #ffd700; }
-  .search-container {
-    text-align: center;
-    margin: 20px 0;
-  }
-  #searchInput {
-    width: 90%;
-    max-width: 400px;
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-  #searchInput:focus { border-color: #003366; outline: none; }
-  #jobsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 15px;
-    padding: 0 20px 40px 20px;
-  }
-  .job-card {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: 0.3s;
-  }
-  .job-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-  .job-card h4 { margin-bottom: 10px; color: #003366; }
-  .job-card p { margin: 8px 0; }
-  .status-badge {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 12px;
-    color: #fff;
-    font-weight: 500;
-    font-size: 14px;
-  }
-  .Received { background-color: #007bff; }
-  .InProgress { background-color: #ffc107; color: #333; }
-  .Ready { background-color: #28a745; }
-  .Delivered { background-color: #6c757d; }
-  .status-select { padding: 8px; border-radius: 8px; border: 1px solid #ccc; margin-right: 10px; }
-  .update-btn { padding: 8px 16px; border:none; border-radius:8px; background-color:#003366; color:#fff; cursor:pointer; }
-  .update-btn:hover { background-color: #0055aa; }
-  @media(max-width: 500px){
-    header img { margin-bottom: 10px; }
-  }
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
+body { background-color: #f5f8fb; color: #333; }
+h2, h3 { text-align:center; margin:15px 0; }
+
+/* Header */
+header {
+  display:flex; align-items:center; justify-content:center;
+  background-color:#003366; padding:20px; color:#fff; flex-wrap:wrap;
+}
+header img { height:60px; margin-right:20px; }
+header div { text-align:center; }
+header h1 { margin-bottom:5px; font-size:24px; }
+header p { margin:0; font-size:16px; color:#ffd700; }
+
+/* Search */
+.search-container { text-align:center; margin:20px 0; }
+#searchInput {
+  width:90%; max-width:400px; padding:10px 15px;
+  font-size:16px; border-radius:8px; border:1px solid #ccc;
+  transition:0.3s;
+}
+#searchInput:focus { border-color:#003366; outline:none; }
+
+/* Job Cards */
+#jobsContainer {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+  gap:15px; padding:0 20px 40px 20px;
+}
+.job-card {
+  background-color:#fff; padding:20px; border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:0.3s;
+}
+.job-card:hover { transform:translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+.job-card h4 { margin-bottom:10px; color:#003366; }
+.job-card p { margin:5px 0; }
+.status-badge {
+  display:inline-block; padding:5px 10px; border-radius:12px;
+  color:#fff; font-weight:500; font-size:14px;
+}
+.Received { background-color:#007bff; }
+.In-Progress { background-color:#ffc107; color:#333; }
+.Ready { background-color:#28a745; }
+.Delivered { background-color:#6c757d; }
+
+.status-select { padding:5px 10px; border-radius:8px; border:1px solid #ccc; margin-right:10px; }
+.update-btn { padding:6px 12px; border:none; border-radius:8px; background-color:#003366; color:#fff; cursor:pointer; transition:0.3s; }
+.update-btn:hover { background-color:#0055aa; }
 </style>
 </head>
 <body>
+
 <header>
   <img src="logo.png" alt="RightClick Logo">
   <div>
@@ -79,14 +64,16 @@
     <p>Professional Device Service Management</p>
   </div>
 </header>
+
 <div class="search-container">
-  <input type="text" id="searchInput" placeholder="Search by Job ID, Name, or Mobile">
+  <input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
 </div>
+
 <div id="jobsContainer"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
@@ -96,93 +83,82 @@ const firebaseConfig = {
   messagingSenderId: "558210394752",
   appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const jobsContainer = document.getElementById("jobsContainer");
-let allJobs = [];
+const searchInput = document.getElementById("searchInput");
 
-const q = query(collection(db, "jobs"), orderBy("receivedDate", "desc"));
-onSnapshot(q, (snapshot) => {
-  allJobs = snapshot.docs.map(doc => ({id: doc.id, data: doc.data()}));
-  renderJobs("");
-});
-
-function renderJobs(filter = "") {
-  filter = filter.toLowerCase();
+async function loadJobs() {
   jobsContainer.innerHTML = "";
-  
-  const filtered = allJobs.filter(job => 
-    job.data.jobId.toLowerCase().includes(filter) ||
-    job.data.customerName.toLowerCase().includes(filter) ||
-    job.data.mobile.includes(filter)
-  );
-
-  filtered.forEach(jobObj => {
-    const job = jobObj.data;
-    const docId = jobObj.id;
-    
-    let accList = [];
-    if (job.accessories?.adapter) accList.push("Adapter");
-    if (job.accessories?.cable) accList.push("Power Cable");
-    if (job.accessories?.hdmiVga) accList.push("HDMI/VGA Cable");
-    if (job.accessories?.other) accList.push(job.accessories.other);
-    const accString = accList.length ? accList.join(", ") : "None";
-    
-    const receivedStr = job.receivedDate ? new Date(job.receivedDate.toMillis()).toLocaleDateString('en-IN') : "N/A";
-    const displayStatus = job.status === "InProgress" ? "In Progress" : job.status;
-
+  const querySnapshot = await getDocs(collection(db, "jobs"));
+  querySnapshot.forEach(docSnap => {
+    const job = docSnap.data();
     const card = document.createElement("div");
     card.className = "job-card";
+
+    const statusClass = job.status.replace(/\s/g, "-"); // Replace spaces with hyphen for CSS class
+
     card.innerHTML = `
-      <h4>Job ID: ${job.jobId} <span class="status-badge ${job.status}">${displayStatus}</span></h4>
+      <h4>${job.jobId}</h4>
       <p><strong>Customer:</strong> ${job.customerName}</p>
       <p><strong>Mobile:</strong> ${job.mobile}</p>
       <p><strong>Item:</strong> ${job.item}</p>
-      <p><strong>Received:</strong> ${receivedStr}</p>
-      <p><strong>Problem:</strong> ${job.problem}</p>
-      <p><strong>Accessories:</strong> ${accString}</p>
-      <div style="margin-top:15px;">
-        <select class="status-select" id="select-${docId}">
+      <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${job.status}</span></p>
+      <div>
+        <select class="status-select" id="select-${docSnap.id}">
           <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
-          <option value="InProgress" ${job.status==="InProgress"?"selected":""}>In Progress</option>
+          <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
           <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
           <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
         </select>
-        <button class="update-btn" onclick="updateStatus('${docId}')">Update</button>
+        <button class="update-btn" onclick="updateStatus('${docSnap.id}')">Update</button>
       </div>
     `;
     jobsContainer.appendChild(card);
   });
 }
 
-document.getElementById("searchInput").addEventListener("input", (e) => renderJobs(e.target.value));
-
 window.updateStatus = async function(docId) {
   const select = document.getElementById(`select-${docId}`);
   const newStatus = select.value;
   const docRef = doc(db, "jobs", docId);
   await updateDoc(docRef, { status: newStatus });
-  
-  const badge = select.closest(".job-card").querySelector(".status-badge");
-  badge.textContent = newStatus === "InProgress" ? "In Progress" : newStatus;
-  badge.className = `status-badge ${newStatus}`;
 
-  if (newStatus === "Ready" || newStatus === "Delivered") {
-    const jobSnap = await getDoc(docRef);
-    const job = jobSnap.data();
-    let message = newStatus === "Ready" 
-      ? `Hello ${job.customerName}! Your ${job.item} is READY for pickup.\nJob ID: ${job.jobId}\nRightClick Computers`
-      : `Thank you ${job.customerName}! Your ${job.item} has been delivered.\nJob ID: ${job.jobId}`;
-    const encMsg = encodeURIComponent(message);
-    let num = job.mobile;
-    if (!num.startsWith("91")) num = "91" + num;
-    window.open(`https://wa.me/${num}?text=${encMsg}`, "_blank");
+  const card = select.closest(".job-card");
+  const badge = card.querySelector(".status-badge");
+  badge.innerText = newStatus;
+  badge.className = "status-badge " + newStatus.replace(/\s/g, "-");
+
+  alert("Status updated to: " + newStatus);
+
+  if(newStatus==="Received") {
+    const jobDoc = await getDoc(docRef);
+    const job = jobDoc.data();
+    const message = encodeURIComponent(
+`RightClick Computer Sales & Service Center
+Your device has been received successfully.
+Job ID: ${job.jobId}
+Thank you for choosing us!`
+    );
+    let customerNumber = job.mobile;
+    if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber;
+    window.open(`https://wa.me/${customerNumber}?text=${message}`, "_blank");
   }
-  
-  alert("Status updated!");
 };
+
+// Search
+searchInput.addEventListener("input", ()=>{
+  const filter = searchInput.value.toLowerCase();
+  const cards = jobsContainer.getElementsByClassName("job-card");
+  Array.from(cards).forEach(card=>{
+    const customer = card.querySelector("p:nth-of-type(1)").textContent.toLowerCase();
+    const jobId = card.querySelector("h4").textContent.toLowerCase();
+    card.style.display = (customer.includes(filter) || jobId.includes(filter)) ? "" : "none";
+  });
+});
+
+loadJobs();
 </script>
 </body>
 </html>
