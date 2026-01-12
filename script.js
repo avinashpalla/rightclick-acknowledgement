@@ -1,87 +1,119 @@
 alert("Script.js loaded");
-// Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-// Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
-  authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
-};
+const firebaseConfig = { /* your config - keep same */ };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Wait for page load
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("jobForm");
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     try {
-      // Collect form values
-      const customerName = document.getElementById("customerName").value;
-      const mobile = document.getElementById("mobile").value;
+      const customerName = document.getElementById("customerName").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
       const item = document.getElementById("item").value;
-      const problem = document.getElementById("problem").value;
-      const signature = document.getElementById("signature").value;
+      const problem = document.getElementById("problem").value.trim();
+      const signature = document.getElementById("signature").value.trim();
 
-      // Accessories (checkboxes)
       const accessories = {
-        adapter: document.getElementById("accAdapter")?.checked || false,
-        cable: document.getElementById("accCable")?.checked || false,
-        bag: document.getElementById("accBag")?.checked || false,
-        other: document.getElementById("accOther")?.value || ""
+        adapter: document.getElementById("accAdapter").checked,
+        cable: document.getElementById("accCable").checked,
+        hdmiVga: document.getElementById("accHdmiVga").checked,
+        other: document.getElementById("accOther").value.trim()
       };
 
-      // Generate Job ID
       const jobId = "RC-" + Date.now();
 
-      // Save to Firestore
       await addDoc(collection(db, "jobs"), {
-        jobId: jobId,
-        customerName: customerName,
-        mobile: mobile,
-        item: item,
-        accessories: accessories,
-        problem: problem,
+        jobId,
+        customerName,
+        mobile,
+        item,
+        accessories,
+        problem,
         status: "Received",
         receivedDate: serverTimestamp(),
-        signature: signature
+        signature
       });
 
-      // Confirmation popup
-      alert(`Job Saved Successfully!\nJob ID: ${jobId}`);
+      // Build accessories string for print & WA
+      let accList = [];
+      if (accessories.adapter) accList.push("Adapter");
+      if (accessories.cable) accList.push("Power Cable");
+      if (accessories.hdmiVga) accList.push("HDMI/VGA Cable");
+      if (accessories.other) accList.push(accessories.other);
+      const accString = accList.length ? accList.join(", ") : "None";
 
-      form.reset();
+      // Printable slip
+      const printContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Acknowledgement - ${jobId}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; line-height: 1.6; }
+    h2 { text-align: center; color: #003366; }
+    .label { font-weight: bold; }
+    hr { margin: 20px 0; }
+    ul { margin-left: 20px; }
+    @media print { button { display: none; } }
+  </style>
+</head>
+<body>
+  <h2>RightClick Computer Sales & Service Center</h2>
+  <p style="text-align:center;">[Shop Address, Visakhapatnam]<br>Mobile: [Your Number]<br>Email: [email]</p>
+  <hr>
+  <h3>Customer Acknowledgement Receipt</h3>
+  <p><span class="label">Job ID:</span> ${jobId}</p>
+  <p><span class="label">Date:</span> ${new Date().toLocaleDateString('en-IN')}</p>
+  <p><span class="label">Customer:</span> ${customerName}</p>
+  <p><span class="label">Mobile:</span> ${mobile}</p>
+  <p><span class="label">Item:</span> ${item}</p>
+  <p><span class="label">Accessories:</span> ${accString}</p>
+  <p><span class="label">Problem:</span> ${problem}</p>
+  <p><span class="label">Received By:</span> ${signature}</p>
+  <hr>
+  <p><strong>Terms & Conditions:</strong></p>
+  <ul>
+    <li>Backup your data - we are not responsible for data loss.</li>
+    <li>Estimated time will be informed later.</li>
+    <li>Warranty on repairs as per policy.</li>
+    <li>Please quote Job ID for enquiries.</li>
+  </ul>
+  <p style="text-align:center; margin-top:30px;">Thank you for choosing RightClick!</p>
+  <div style="text-align:center; margin-top:30px;">
+    <button onclick="window.print()" style="padding:15px 30px; font-size:18px; background:#003366; color:white; border:none;">Print Receipt</button>
+  </div>
+</body>
+</html>`;
+      const printWin = window.open('', '_blank');
+      printWin.document.write(printContent);
+      printWin.document.close();
+      printWin.focus();
 
-      // ---------------- WhatsApp Free Click-to-Chat ----------------
-      const message = encodeURIComponent(
+      // WhatsApp to customer
+      let customerNumber = mobile;
+      if (!customerNumber.startsWith("91")) customerNumber = "91" + customerNumber;
+      const waMessage = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 
-Your device has been received successfully.
+Thank you ${customerName}!
+Your ${item} has been received.
+
 Job ID: ${jobId}
-Thank you for choosing us!`
-      );
+Problem: ${problem}
 
-      // Your WhatsApp number (personal)
-      const whatsappNumber = "919059895427"; // 91 + your number
+We will update you soon.`);
+      window.open(`https://wa.me/${customerNumber}?text=${waMessage}`, "_blank");
 
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-
-      // Open WhatsApp in new tab
-      window.open(whatsappUrl, "_blank");
-      // ----------------------------------------------------------------
-
+      alert(`Success! Job ID: ${jobId}\nPrint window opened.`);
+      form.reset();
     } catch (error) {
-      console.error("Error saving job:", error);
-      alert("Error saving job. Check console.");
+      console.error(error);
+      alert("Error - check console.");
     }
   });
 });
