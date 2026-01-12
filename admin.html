@@ -3,8 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <title>RightClick Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f2f5f9;
+      padding:20px;
+    }
+    h2,h3{
+      text-align:center;
+      color:#333;
+    }
+    input{
+      width:100%;
+      padding:10px;
+      margin:15px 0;
+      border-radius:5px;
+      border:1px solid #ccc;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:#fff;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+    th,td{
+      padding:10px;
+      text-align:center;
+      border-bottom:1px solid #ddd;
+    }
+    th{
+      background:#0a4cff;
+      color:white;
+    }
+    select,button{
+      padding:6px;
+      border-radius:4px;
+      border:1px solid #ccc;
+    }
+    button{
+      background:#0a4cff;
+      color:white;
+      cursor:pointer;
+    }
+    button:hover{
+      background:#083bd1;
+    }
+    .status-Received{color:#0066ff;font-weight:bold;}
+    .status-InProgress{color:#ff9800;font-weight:bold;}
+    .status-Ready{color:#2e7d32;font-weight:bold;}
+    .status-Delivered{color:#555;font-weight:bold;}
+  </style>
 </head>
 <body>
 
@@ -13,28 +62,25 @@
 
 <input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
 
-<table border="1" id="jobsTable">
+<table>
   <thead>
     <tr>
       <th>Job ID</th>
-      <th>Customer Name</th>
+      <th>Customer</th>
       <th>Mobile</th>
       <th>Item</th>
       <th>Status</th>
-      <th>Update Status</th>
+      <th>Update</th>
     </tr>
   </thead>
-  <tbody id="jobsBody">
-    <!-- Jobs will appear here -->
-  </tbody>
+  <tbody id="jobsBody"></tbody>
 </table>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
@@ -50,86 +96,94 @@ const db = getFirestore(app);
 const jobsBody = document.getElementById("jobsBody");
 const searchInput = document.getElementById("searchInput");
 
-// Load jobs from Firestore
 async function loadJobs() {
   jobsBody.innerHTML = "";
-  const querySnapshot = await getDocs(collection(db, "jobs"));
-  querySnapshot.forEach(docSnap => {
-    const job = docSnap.data();
-    const row = document.createElement("tr");
+  const snap = await getDocs(collection(db,"jobs"));
 
-    row.innerHTML = `
+  snap.forEach(docSnap=>{
+    const job = docSnap.data();
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
       <td>${job.jobId}</td>
       <td>${job.customerName}</td>
       <td>${job.mobile}</td>
       <td>${job.item}</td>
-      <td id="status-${docSnap.id}">${job.status}</td>
+      <td id="status-${docSnap.id}" class="status-${job.status.replace(" ","")}">${job.status}</td>
       <td>
         <select id="select-${docSnap.id}">
-          <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
-          <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
-          <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
-          <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
+          <option ${job.status==="Received"?"selected":""}>Received</option>
+          <option ${job.status==="In Progress"?"selected":""}>In Progress</option>
+          <option ${job.status==="Ready"?"selected":""}>Ready</option>
+          <option ${job.status==="Delivered"?"selected":""}>Delivered</option>
         </select>
         <button onclick="updateStatus('${docSnap.id}')">Update</button>
       </td>
     `;
-    jobsBody.appendChild(row);
+    jobsBody.appendChild(tr);
   });
 }
 
-// Update job status
-window.updateStatus = async function(docId) {
+window.updateStatus = async function(docId){
   const select = document.getElementById(`select-${docId}`);
   const newStatus = select.value;
-  const docRef = doc(db, "jobs", docId);
-  await updateDoc(docRef, { status: newStatus });
+  const docRef = doc(db,"jobs",docId);
+
+  await updateDoc(docRef,{status:newStatus});
   document.getElementById(`status-${docId}`).innerText = newStatus;
-  alert("Status updated to: " + newStatus);
 
-  // ---------------- WhatsApp notification for Received ----------------
-  if(newStatus === "Received") {
-    const jobDoc = await getDoc(docRef);
-    const job = jobDoc.data();
+  const jobSnap = await getDoc(docRef);
+  const job = jobSnap.data();
 
-    const message = encodeURIComponent(
-`RightClick Computer Sales & Service Center
+  let message="";
+
+  if(newStatus==="Received"){
+    message=`RightClick Computer Sales & Service Center
 
 Your device has been received successfully.
-Job ID: ${job.jobId}
-Thank you for choosing us!`
-    );
-
-    let customerNumber = job.mobile;
-    if (!customerNumber.startsWith("91")) {
-      customerNumber = "91" + customerNumber; // Add India country code
-    }
-
-    const whatsappUrl = `https://wa.me/${customerNumber}?text=${message}`;
-    window.open(whatsappUrl, "_blank");
+Job ID: ${job.jobId}`;
   }
-  // ----------------------------------------------------------------------
+  else if(newStatus==="In Progress"){
+    message=`RightClick Computer Sales & Service Center
+
+Your device service is in progress.
+Job ID: ${job.jobId}`;
+  }
+  else if(newStatus==="Ready"){
+    message=`RightClick Computer Sales & Service Center
+
+Your device is ready for delivery.
+Job ID: ${job.jobId}
+Please visit our store.`;
+  }
+  else if(newStatus==="Delivered"){
+    message=`RightClick Computer Sales & Service Center
+
+Your device has been delivered.
+Job ID: ${job.jobId}
+Thank you for choosing us.`;
+  }
+
+  if(message!==""){
+    let num = job.mobile;
+    if(!num.startsWith("91")) num="91"+num;
+    const url=`https://wa.me/${num}?text=${encodeURIComponent(message)}`;
+    window.open(url,"_blank");
+  }
+
+  alert("Status updated: "+newStatus);
 }
 
-// Search functionality
-searchInput.addEventListener("input", () => {
+searchInput.addEventListener("input",()=>{
   const filter = searchInput.value.toLowerCase();
   const rows = jobsBody.getElementsByTagName("tr");
-  for (let i=0; i<rows.length; i++) {
-    const cells = rows[i].getElementsByTagName("td");
-    let show = false;
-    for (let j=0; j<2; j++) { // check Job ID and Customer Name
-      if (cells[j].innerText.toLowerCase().includes(filter)) {
-        show = true;
-        break;
-      }
-    }
-    rows[i].style.display = show ? "" : "none";
+  for(let r of rows){
+    const txt = r.innerText.toLowerCase();
+    r.style.display = txt.includes(filter) ? "" : "none";
   }
 });
 
 loadJobs();
-
 </script>
 
 </body>
