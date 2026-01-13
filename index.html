@@ -6,33 +6,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;font-family:Roboto;margin:0;padding:0}
-body{background:#eef2f6}
-header{background:#002b55;color:white;display:flex;align-items:center;gap:15px;padding:12px}
-header img{height:55px}
-main{max-width:750px;margin:30px auto;background:white;padding:25px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
-h2{text-align:center;margin-bottom:15px;color:#002b55}
-
-label{margin-top:12px;display:block;font-weight:500}
-input,select,textarea{
-  width:100%;padding:9px;border-radius:6px;border:1px solid #ccc;margin-top:5px;
+:root{
+  --primary:#0b3a66;
+  --secondary:#1c6dd0;
+  --bg:#f3f6fb;
+  --card:#ffffff;
+  --radius:12px;
 }
+*{
+  box-sizing:border-box;
+  font-family:Poppins, sans-serif;
+}
+body{
+  margin:0;
+  background:var(--bg);
+}
+
+/* HEADER – MOBILE FIRST */
+header{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  padding:12px 10px;
+  text-align:center;
+}
+header img{
+  height:60px;
+  display:block;
+  margin:0 auto;
+}
+header h2{
+  margin:6px 0 0;
+  font-size:18px;
+  color:white;
+  font-weight:600;
+}
+
+/* FORM CARD */
+main{
+  padding:15px;
+}
+.form-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+.form-card h3{
+  text-align:center;
+  color:var(--primary);
+  margin-bottom:12px;
+}
+
+label{
+  font-size:13px;
+  font-weight:500;
+  margin-top:10px;
+  display:block;
+}
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+textarea{resize:none}
+
 button{
-  margin-top:20px;
+  margin-top:18px;
   width:100%;
   padding:12px;
-  background:#002b55;
+  background:var(--secondary);
   color:white;
   border:none;
-  border-radius:6px;
+  border-radius:10px;
   font-size:16px;
+  font-weight:600;
   cursor:pointer;
 }
-.hidden{display:none}
+button:active{
+  transform:scale(.98);
+}
 
+/* Popup */
 #popup{
   display:none;
   position:fixed;
@@ -40,14 +99,47 @@ button{
   background:rgba(0,0,0,.6);
   justify-content:center;
   align-items:center;
+  z-index:100;
 }
 .popup-box{
   background:white;
-  padding:25px;
-  border-radius:12px;
   width:90%;
-  max-width:400px;
+  max-width:380px;
+  border-radius:16px;
+  padding:20px;
   text-align:center;
+  animation:pop .3s ease;
+}
+@keyframes pop{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.popup-box img{
+  height:50px;
+}
+.popup-box h3{
+  margin:10px 0;
+  color:var(--primary);
+}
+.popup-box p{
+  font-size:14px;
+  margin:4px 0;
+}
+.hidden{display:none}
+
+/* DESKTOP */
+@media(min-width:768px){
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:15px;
+  }
+  header h2{font-size:22px}
+  main{
+    max-width:500px;
+    margin:20px auto;
+  }
 }
 </style>
 </head>
@@ -56,64 +148,66 @@ button{
 
 <header>
   <img src="logo.png">
-  <div>
-    <h2>RightClick Computer Sales & Service Center</h2>
-  </div>
+  <h2>RightClick Computer Sales & Service Center</h2>
 </header>
 
 <main>
-<h2>Job Acknowledgement Form</h2>
+  <div class="form-card">
+    <h3>Job Acknowledgement</h3>
 
-<form id="jobForm">
+    <form id="jobForm">
 
-<label>Date</label>
-<input type="text" id="jobDate" required>
+      <label>Date</label>
+      <input type="text" id="jobDate" required>
 
-<label>Customer Name</label>
-<input type="text" id="customerName" required>
+      <label>Customer Name</label>
+      <input type="text" id="customerName" required>
 
-<label>Mobile Number</label>
-<input type="tel" id="mobile" required>
+      <label>Mobile Number</label>
+      <input type="tel" id="mobile" required>
 
-<label>Item Category</label>
-<select id="itemCategory" required>
-  <option value="">Select</option>
-  <option>Laptop</option>
-  <option>Desktop</option>
-  <option>Printer</option>
-  <option>Monitor</option>
-  <option>UPS</option>
-  <option>Other</option>
-</select>
+      <label>Item Category</label>
+      <select id="itemCategory" required>
+        <option value="">Select</option>
+        <option>Laptop</option>
+        <option>Desktop</option>
+        <option>Printer</option>
+        <option>Monitor</option>
+        <option>UPS</option>
+        <option>Other</option>
+      </select>
 
-<label id="itemNameLabel">Item Name</label>
-<input type="text" id="itemName" required>
+      <label id="itemNameLabel">Item Name</label>
+      <input type="text" id="itemName" required>
 
-<label>Accessories Received</label>
-<select id="accessoriesType" required>
-  <option value="">Select</option>
-  <option>Without power cable and adapter</option>
-  <option>With Adapter without power cable</option>
-  <option>With power cable and adapter</option>
-  <option value="Other">Other</option>
-</select>
+      <label>Accessories Received</label>
+      <select id="accessoriesType" required>
+        <option value="">Select</option>
+        <option>Without power cable and adapter</option>
+        <option>With Adapter without power cable</option>
+        <option>With power cable and adapter</option>
+        <option value="Other">Other</option>
+      </select>
 
-<input type="text" id="accessoriesOther" class="hidden" placeholder="Specify accessories">
+      <input type="text" id="accessoriesOther" class="hidden" placeholder="Specify accessories">
 
-<label>Problem Reported</label>
-<textarea id="problem" rows="3"></textarea>
+      <label>Problem Reported</label>
+      <textarea id="problem" rows="3"></textarea>
 
-<button type="submit">Generate Acknowledgement</button>
-</form>
+      <button type="submit">Create Job & Send WhatsApp</button>
+    </form>
+  </div>
 </main>
 
+<!-- POPUP -->
 <div id="popup">
   <div class="popup-box">
-    <img src="logo.png" height="50"><br><br>
-    <h3>Job Created Successfully</h3>
+    <img src="logo.png">
+    <h3>Job Created</h3>
     <p><b>Job ID:</b> <span id="pJobId"></span></p>
+    <p><b>Customer:</b> <span id="pCustomer"></span></p>
     <p><b>Item:</b> <span id="pItem"></span></p>
-    <p>Status: <b>Received</b></p>
+    <p><b>Accessories:</b> <span id="pAccessories"></span></p>
     <button onclick="closePopup()">Close</button>
   </div>
 </div>
@@ -138,85 +232,91 @@ const db = getFirestore(app);
 
 flatpickr("#jobDate",{dateFormat:"Y-m-d",defaultDate:"today"});
 
-// Dynamic Item Name Label
 itemCategory.addEventListener("change",()=>{
-  itemNameLabel.innerText = itemCategory.value ? itemCategory.value + " Name" : "Item Name";
+  itemNameLabel.innerText = itemCategory.value ? itemCategory.value+" Name" : "Item Name";
 });
 
-// Accessories Other Toggle
 accessoriesType.addEventListener("change",()=>{
-  accessoriesOther.classList.toggle("hidden", accessoriesType.value !== "Other");
+  accessoriesOther.classList.toggle("hidden", accessoriesType.value!=="Other");
 });
 
-// Safe Job ID generator (no page duplication)
 async function generateJobId(){
-  const d = new Date();
-  const datePart = d.getFullYear() + String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0');
-
-  const q = query(collection(db,"jobs"), orderBy("jobId","desc"), limit(1));
-  const snap = await getDocs(q);
-
-  let num = 1;
+  const d=new Date();
+  const datePart=d.getFullYear()+String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0");
+  const q=query(collection(db,"jobs"),orderBy("jobId","desc"),limit(1));
+  const snap=await getDocs(q);
+  let num=1;
   if(!snap.empty){
-    const last = snap.docs[0].data().jobId;
-    if(last.startsWith(datePart)){
-      num = parseInt(last.split("-")[1]) + 1;
-    }
+    const last=snap.docs[0].data().jobId;
+    if(last.startsWith(datePart)) num=parseInt(last.split("-")[1])+1;
   }
   return `${datePart}-${String(num).padStart(4,"0")}`;
 }
 
-// Prevent double submission
-let submitting = false;
+let submitting=false;
 
-jobForm.addEventListener("submit", async (e)=>{
+jobForm.addEventListener("submit",async(e)=>{
   e.preventDefault();
   if(submitting) return;
-  submitting = true;
+  submitting=true;
 
-  const jobId = await generateJobId();
-  const time = new Date().toLocaleString("en-IN");
-
+  const jobId=await generateJobId();
+  const time=new Date().toLocaleString("en-IN");
   const accessories = accessoriesType.value==="Other" ? accessoriesOther.value : accessoriesType.value;
 
-  const jobData = {
+  const data={
     jobId,
-    date: jobDate.value,
-    customerName: customerName.value,
-    mobile: mobile.value,
-    itemCategory: itemCategory.value,
-    itemName: itemName.value,
+    date:jobDate.value,
+    customerName:customerName.value,
+    mobile:mobile.value,
+    itemCategory:itemCategory.value,
+    itemName:itemName.value,
     accessories,
-    problem: problem.value,
+    problem:problem.value,
     status:"Received",
-    timestamp: time
+    timestamp:time
   };
 
-  await addDoc(collection(db,"jobs"),jobData);
+  await addDoc(collection(db,"jobs"),data);
 
-  let mobileNo = mobile.value;
-  if(!mobileNo.startsWith("91")) mobileNo = "91"+mobileNo;
+  let mobileNo=mobile.value;
+  if(!mobileNo.startsWith("91")) mobileNo="91"+mobileNo;
 
-  const msg = encodeURIComponent(
+  const msg=encodeURIComponent(
 `RightClick Computer Sales & Service Center
-Your device has been "received" successfully.
-Job ID: ${jobId}
-Timestamp: ${time}
-Thank you.`
+
+Hello ${data.customerName},
+
+Your device has been successfully RECEIVED.
+
+Job ID : ${jobId}
+Date & Time : ${time}
+Mobile : ${data.mobile}
+
+Device : ${data.itemCategory}
+Model / Name : ${data.itemName}
+
+Accessories : ${data.accessories}
+
+Problem :
+${data.problem || "Not specified"}
+
+Thank you for choosing RightClick.`
   );
 
   window.open(`https://wa.me/${mobileNo}?text=${msg}`,"_blank");
 
-  pJobId.innerText = jobId;
-  pItem.innerText = itemName.value;
-  popup.style.display="flex";
+  pJobId.innerText=jobId;
+  pCustomer.innerText=data.customerName;
+  pItem.innerText=data.itemName;
+  pAccessories.innerText=data.accessories;
 
+  popup.style.display="flex";
   jobForm.reset();
-  submitting = false;
+  submitting=false;
 });
 
-window.closePopup = ()=> popup.style.display="none";
-
+window.closePopup=()=>popup.style.display="none";
 </script>
 
 </body>
