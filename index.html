@@ -4,80 +4,37 @@
 <meta charset="UTF-8">
 <title>RightClick Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
 <style>
 *{box-sizing:border-box;font-family:'Roboto',sans-serif}
 body{margin:0;background:#f5f8fb}
-header{
-  background:#003366;
-  padding:16px;
-  text-align:center;
-}
-header img{
-  height:60px;
-  display:block;
-  margin:0 auto 8px;
-}
+header{background:#003366;padding:16px;text-align:center}
+header img{height:60px;margin:0 auto 8px;display:block}
 header h1{color:#fff;font-size:20px;margin:0}
 header p{color:#ffd700;margin:4px 0 0}
-
-main{
-  max-width:520px;
-  margin:20px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,.1);
-}
-
+main{max-width:520px;margin:20px auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.1)}
 label{font-weight:500;margin-top:14px;display:block}
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:15px;
-}
-
-button{
-  width:100%;
-  margin-top:20px;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#003366;
-  color:#fff;
-  font-size:17px;
-  font-weight:600;
-}
-
+input,select,textarea{width:100%;padding:12px;margin-top:6px;border-radius:8px;border:1px solid #ccc;font-size:15px}
+button{width:100%;margin-top:20px;padding:14px;border:none;border-radius:10px;background:#003366;color:#fff;font-size:17px;font-weight:600}
 .hidden{display:none}
 </style>
 </head>
-
 <body>
 
 <header>
-  <img src="logo.png" alt="RightClick Logo">
+  <img src="logo.png">
   <h1>RightClick Computer Sales & Service Center</h1>
   <p>Professional Device Service</p>
 </header>
 
 <main>
 <form id="jobForm">
-
-<label>Job Date</label>
-<input type="text" id="jobDate" required>
-
 <label>Customer Name</label>
-<input type="text" id="customerName" required>
+<input id="customerName" required>
 
-<label>Mobile Number</label>
-<input type="tel" id="mobile" required>
+<label>Mobile</label>
+<input id="mobile" required>
 
 <label>Device Type</label>
 <select id="item" required>
@@ -85,32 +42,18 @@ button{
   <option>Laptop</option>
   <option>Desktop</option>
   <option>Printer</option>
-  <option>Monitor</option>
   <option>Other</option>
 </select>
 
 <label id="deviceLabel">Device Name</label>
-<input type="text" id="deviceName" required>
+<input id="deviceName" required>
 
-<label>Accessories Received</label>
-<select id="accessories">
-  <option>Without power cable and adapter</option>
-  <option>With Adapter without power cable</option>
-  <option>With power cable and adapter</option>
-  <option value="Other">Other</option>
-</select>
+<label>Problem</label>
+<textarea id="problem"></textarea>
 
-<input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
-
-<label>Problem Reported</label>
-<textarea id="problem" rows="3"></textarea>
-
-<button type="submit">Generate Acknowledgement</button>
-
+<button type="submit">Create Job & Send WhatsApp</button>
 </form>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -119,81 +62,51 @@ import { getFirestore, collection, addDoc } from "https://www.gstatic.com/fireba
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+  projectId: "rightclick-service-center"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-flatpickr("#jobDate", { dateFormat:"d/m/Y", defaultDate:"today" });
-
-const item = document.getElementById("item");
-const deviceLabel = document.getElementById("deviceLabel");
-const accessories = document.getElementById("accessories");
-const accessoriesOther = document.getElementById("accessoriesOther");
-
-item.onchange = () => {
-  deviceLabel.innerText = item.value ? item.value + " Name" : "Device Name";
-};
-
-accessories.onchange = () => {
-  accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
-};
-
-document.getElementById("jobForm").addEventListener("submit", async (e) => {
+document.getElementById("jobForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
-  const jobId = "RC-" + Date.now();
-
-  const accFinal = accessories.value === "Other"
-      ? accessoriesOther.value
-      : accessories.value;
+  const jobId = Date.now().toString();
 
   const data = {
     jobId,
-    date: jobDate.value,
     customerName: customerName.value,
     mobile: mobile.value,
     item: item.value,
     deviceName: deviceName.value,
-    accessories: accFinal,
     problem: problem.value,
     status: "Received",
-    timestamp: new Date().toLocaleString("en-IN")
+    time: new Date().toLocaleString("en-IN")
   };
 
-  // Save to Firestore
-  await addDoc(collection(db, "jobs"), data);
+  // WhatsApp first
+  let num = data.mobile;
+  if(!num.startsWith("91")) num = "91"+num;
 
-  // WhatsApp Message
-  const waMsg = encodeURIComponent(
+  const msg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 Hello ${data.customerName},
+Your device has been received.
 
-Your device has been successfully received.
+Job ID: ${data.jobId}
+Device: ${data.item}
+Name: ${data.deviceName}
+Problem: ${data.problem}
 
-Job ID : ${data.jobId}
-Date & Time : ${data.timestamp}
-Mobile : ${data.mobile}
-Device : ${data.item}
-${data.item} Name : ${data.deviceName}
-Accessories : ${data.accessories}
-
-Problem:
-${data.problem}
-
-Thank you for choosing RightClick.`
+Thank you.`
   );
 
-  let num = data.mobile;
-  if(!num.startsWith("91")) num = "91" + num;
+  window.open(`https://wa.me/${num}?text=${msg}`,"_blank");
 
-  window.open(`https://wa.me/${num}?text=${waMsg}`, "_blank");
+  // Save in Firestore
+  await addDoc(collection(db,"jobs"),data);
 
-  alert("Job Created Successfully!\nJob ID : " + data.jobId);
+  alert("Job Created: "+data.jobId);
   e.target.reset();
 });
 </script>
