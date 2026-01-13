@@ -1,207 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>RightClick Job Acknowledgement</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RightClick – Job Acknowledgement</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-<style>
-*{box-sizing:border-box;font-family:'Roboto',sans-serif}
-body{margin:0;background:#f5f8fb}
-header{
-  background:#003366;
-  padding:16px;
-  text-align:center;
-}
-header img{
-  height:60px;
-  display:block;
-  margin:0 auto 8px;
-}
-header h1{color:#fff;font-size:20px;margin:0}
-header p{color:#ffd700;margin:4px 0 0}
-
-main{
-  max-width:520px;
-  margin:20px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,.1);
-}
-
-label{font-weight:500;margin-top:14px;display:block}
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:15px;
-}
-
-button{
-  width:100%;
-  margin-top:20px;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#003366;
-  color:#fff;
-  font-size:17px;
-  font-weight:600;
-}
-
-.hidden{display:none}
-</style>
+  <!-- MOBILE‑FIRST DESIGN -->
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body {
+      margin: 0;
+      padding: 12px;
+      background: #f2f4f7;
+    }
+    .container {
+      max-width: 520px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      max-width: 160px;
+    }
+    h2 {
+      text-align: center;
+      margin: 8px 0 18px;
+      font-size: 20px;
+      color: #222;
+    }
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 12px;
+      display: block;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 4px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    textarea { resize: vertical; min-height: 70px; }
+    .hidden { display: none; }
+    button {
+      margin-top: 20px;
+      background: #0b5ed7;
+      color: #fff;
+      border: none;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    footer {
+      text-align: center;
+      font-size: 11px;
+      margin-top: 12px;
+      color: #666;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="container">
+    <div class="logo">
+      <img src="logo.png" alt="RightClick Logo">
+    </div>
 
-<header>
-  <img src="logo.png" alt="RightClick Logo">
-  <h1>RightClick Computer Sales & Service Center</h1>
-  <p>Professional Device Service</p>
-</header>
+    <h2>Job Acknowledgement</h2>
 
-<main>
-<form id="jobForm">
+    <form id="jobForm">
+      <label>Date</label>
+      <input type="date" required>
 
-<label>Job Date</label>
-<input type="text" id="jobDate" required>
+      <label>Customer Name</label>
+      <input type="text" id="customerName" required>
 
-<label>Customer Name</label>
-<input type="text" id="customerName" required>
+      <label>Mobile Number</label>
+      <input type="tel" id="mobile" maxlength="10" required>
 
-<label>Mobile Number</label>
-<input type="tel" id="mobile" required>
+      <label>Device</label>
+      <select id="deviceType" required>
+        <option value="">Select</option>
+        <option>Laptop</option>
+        <option>Desktop</option>
+        <option>Printer</option>
+        <option>Other</option>
+      </select>
 
-<label>Device Type</label>
-<select id="item" required>
-  <option value="">Select</option>
-  <option>Laptop</option>
-  <option>Desktop</option>
-  <option>Printer</option>
-  <option>Monitor</option>
-  <option>Other</option>
-</select>
+      <label id="deviceNameLabel">Device Name</label>
+      <input type="text" id="deviceName" required>
 
-<label id="deviceLabel">Device Name</label>
-<input type="text" id="deviceName" required>
+      <label>Accessories Received</label>
+      <select id="accessories" required>
+        <option value="">Select</option>
+        <option>Without power cable and adapter</option>
+        <option>With Adapter without power cable</option>
+        <option>With power cable and adapter</option>
+        <option>Other</option>
+      </select>
 
-<label>Accessories Received</label>
-<select id="accessories">
-  <option>Without power cable and adapter</option>
-  <option>With Adapter without power cable</option>
-  <option>With power cable and adapter</option>
-  <option value="Other">Other</option>
-</select>
+      <input
+        type="text"
+        id="accessoriesOther"
+        class="hidden"
+        placeholder="Enter accessories received">
 
-<input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
+      <label>Problem Reported</label>
+      <textarea id="problem" required></textarea>
 
-<label>Problem Reported</label>
-<textarea id="problem" rows="3"></textarea>
+      <button type="submit">Create Job & Send WhatsApp</button>
+    </form>
 
-<button type="submit">Generate Acknowledgement</button>
+    <footer>RightClick Computer Sales & Service Center</footer>
+  </div>
 
-</form>
-</main>
+  <!-- FULL LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      runTransaction,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, doc, runTransaction, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
-  authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-};
+    const form = document.getElementById("jobForm");
+    const deviceType = document.getElementById("deviceType");
+    const deviceNameLabel = document.getElementById("deviceNameLabel");
+    const accessories = document.getElementById("accessories");
+    const accessoriesOther = document.getElementById("accessoriesOther");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    deviceType.addEventListener("change", () => {
+      const v = deviceType.value || "Device";
+      deviceNameLabel.textContent = v + " Name";
+    });
 
-flatpickr("#jobDate",{dateFormat:"d/m/Y",defaultDate:"today"});
+    accessories.addEventListener("change", () => {
+      accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
+    });
 
-const item = document.getElementById("item");
-const deviceLabel = document.getElementById("deviceLabel");
-const accessories = document.getElementById("accessories");
-const accessoriesOther = document.getElementById("accessoriesOther");
+    async function generateJobId() {
+      const d = new Date();
+      const dateKey =
+        d.getFullYear() +
+        String(d.getMonth() + 1).padStart(2, "0") +
+        String(d.getDate()).padStart(2, "0");
 
-item.onchange = ()=>{
-  deviceLabel.innerText = item.value ? item.value+" Name" : "Device Name";
-};
+      const ref = doc(db, "counters", "jobs_" + dateKey);
 
-accessories.onchange = ()=>{
-  accessoriesOther.classList.toggle("hidden", accessories.value!=="Other");
-};
-
-document.getElementById("jobForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-
-  const today = new Date();
-  const dateKey = today.getFullYear().toString()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0');
-
-  const counterRef = doc(db,"counters","jobs");
-
-  const jobId = await runTransaction(db, async tx=>{
-    const snap = await tx.get(counterRef);
-    let seq = 1;
-    if(snap.exists() && snap.data().date===dateKey){
-      seq = snap.data().seq + 1;
+      return await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        const seq = snap.exists() ? snap.data().seq + 1 : 1;
+        tx.set(ref, { seq });
+        return dateKey + String(seq).padStart(4, "0");
+      });
     }
-    tx.set(counterRef,{date:dateKey,seq});
-    return dateKey + String(seq).padStart(4,"0");
-  });
 
-  const accFinal = accessories.value==="Other" ? accessoriesOther.value : accessories.value;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-  const data = {
-    jobId,
-    date:document.getElementById("jobDate").value,
-    customerName:customerName.value,
-    mobile:mobile.value,
-    item:item.value,
-    deviceName:deviceName.value,
-    accessories:accFinal,
-    problem:problem.value,
-    status:"Received",
-    timestamp:new Date().toLocaleString("en-IN")
-  };
+      const customerName = document.getElementById("customerName").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const device = deviceType.value;
+      const deviceName = document.getElementById("deviceName").value.trim();
+      const problem = document.getElementById("problem").value.trim();
+      const acc =
+        accessories.value === "Other"
+          ? accessoriesOther.value.trim()
+          : accessories.value;
 
-  await addDoc(collection(db,"jobs"),data);
+      const jobId = await generateJobId();
 
-  const waMsg = encodeURIComponent(
+      const message = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 
-Hello ${data.customerName},
+Hello ${customerName},
 
 Your device has been successfully RECEIVED.
 
-Job ID : ${data.jobId}
-Date & Time : ${data.timestamp}
-Mobile : ${data.mobile}
-Device : ${data.item}
-${data.item} Name : ${data.deviceName}
-Accessories : ${data.accessories}
+Job ID : ${jobId}
+Date & Time : ${new Date().toLocaleString("en-IN")}
+Mobile : ${mobile}
+
+Device : ${device}
+${device} Name : ${deviceName}
+
+Accessories : ${acc}
+
 Problem :
-${data.problem}
+${problem}
 
 Thank you for choosing RightClick.`
-  );
+      );
 
-  let num=data.mobile;
-  if(!num.startsWith("91")) num="91"+num;
-  window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
+      const phone = mobile.startsWith("91") ? mobile : "91" + mobile;
 
-  alert("Job Created : "+data.jobId);
-  e.target.reset();
-});
-</script>
+      // OPEN WHATSAPP FIRST (POPUP SAFE)
+      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 
+      // SAVE AFTER
+      await addDoc(collection(db, "jobs"), {
+        jobId,
+        customerName,
+        mobile,
+        device,
+        deviceName,
+        accessories: acc,
+        problem,
+        status: "Received",
+        createdAt: serverTimestamp()
+      });
+
+      form.reset();
+      accessoriesOther.classList.add("hidden");
+      deviceNameLabel.textContent = "Device Name";
+    });
+  </script>
 </body>
 </html>
