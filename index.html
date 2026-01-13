@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>RightClick Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
 <style>
 *{box-sizing:border-box;font-family:'Roboto',sans-serif}
 body{margin:0;background:#f5f8fb}
@@ -23,7 +21,6 @@ header img{
 }
 header h1{color:#fff;font-size:20px;margin:0}
 header p{color:#ffd700;margin:4px 0 0}
-
 main{
   max-width:520px;
   margin:20px auto;
@@ -32,7 +29,6 @@ main{
   border-radius:14px;
   box-shadow:0 4px 14px rgba(0,0,0,.1);
 }
-
 label{font-weight:500;margin-top:14px;display:block}
 input,select,textarea{
   width:100%;
@@ -42,7 +38,6 @@ input,select,textarea{
   border:1px solid #ccc;
   font-size:15px;
 }
-
 button{
   width:100%;
   margin-top:20px;
@@ -54,11 +49,9 @@ button{
   font-size:17px;
   font-weight:600;
 }
-
 .hidden{display:none}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -133,44 +126,50 @@ const accessories = document.getElementById("accessories");
 const accessoriesOther = document.getElementById("accessoriesOther");
 
 item.onchange = ()=>{
-  deviceLabel.innerText = item.value ? item.value+" Name" : "Device Name";
+  deviceLabel.innerText = item.value ? item.value + " Name" : "Device Name";
 };
 
 accessories.onchange = ()=>{
-  accessoriesOther.classList.toggle("hidden", accessories.value!=="Other");
+  accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
 };
 
 document.getElementById("jobForm").addEventListener("submit", async e=>{
   e.preventDefault();
 
   const today = new Date();
-  const dateKey = today.getFullYear().toString()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0');
+  const dateKey =
+    today.getFullYear().toString() +
+    String(today.getMonth()+1).padStart(2,'0') +
+    String(today.getDate()).padStart(2,'0');
 
   const counterRef = doc(db,"counters","jobs");
 
   const jobId = await runTransaction(db, async tx=>{
     const snap = await tx.get(counterRef);
     let seq = 1;
-    if(snap.exists() && snap.data().date===dateKey){
+    if(snap.exists() && snap.data().date === dateKey){
       seq = snap.data().seq + 1;
     }
     tx.set(counterRef,{date:dateKey,seq});
     return dateKey + String(seq).padStart(4,"0");
   });
 
-  const accFinal = accessories.value==="Other" ? accessoriesOther.value : accessories.value;
+  const accFinal =
+    accessories.value === "Other"
+      ? accessoriesOther.value
+      : accessories.value;
 
   const data = {
     jobId,
-    date:document.getElementById("jobDate").value,
-    customerName:customerName.value,
-    mobile:mobile.value,
-    item:item.value,
-    deviceName:deviceName.value,
-    accessories:accFinal,
-    problem:problem.value,
-    status:"Received",
-    timestamp:new Date().toLocaleString("en-IN")
+    date: jobDate.value,
+    customerName: customerName.value,
+    mobile: mobile.value,
+    item: item.value,
+    deviceName: deviceName.value,
+    accessories: accFinal,
+    problem: problem.value,
+    status: "Received",
+    timestamp: new Date().toLocaleString("en-IN")
   };
 
   await addDoc(collection(db,"jobs"),data);
@@ -180,25 +179,39 @@ document.getElementById("jobForm").addEventListener("submit", async e=>{
 
 Hello ${data.customerName},
 
-Your device has been successfully RECEIVED.
+Thank you for choosing RightClick.
+We confirm that your device has been successfully received for service.
 
-Job ID : ${data.jobId}
+────────────────────
+Job Acknowledgement
+────────────────────
+Job ID      : ${data.jobId}
 Date & Time : ${data.timestamp}
-Mobile : ${data.mobile}
-Device : ${data.item}
-${data.item} Name : ${data.deviceName}
-Accessories : ${data.accessories}
-Problem :
-${data.problem}
+Mobile      : ${data.mobile}
 
-Thank you for choosing RightClick.`
+Device Type : ${data.item}
+${data.item} Name : ${data.deviceName}
+
+Accessories Received:
+${data.accessories}
+
+Reported Issue:
+${data.problem}
+────────────────────
+
+Our service team will update you once the diagnosis is complete.
+For any queries, feel free to contact us.
+
+Regards,
+RightClick Computer Sales & Service Center`
   );
 
-  let num=data.mobile;
-  if(!num.startsWith("91")) num="91"+num;
+  let num = data.mobile;
+  if(!num.startsWith("91")) num = "91" + num;
+
   window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
 
-  alert("Job Created : "+data.jobId);
+  alert("Job Created Successfully\nJob ID : " + data.jobId);
   e.target.reset();
 });
 </script>
