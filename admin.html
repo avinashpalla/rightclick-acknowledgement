@@ -4,82 +4,105 @@
 <meta charset="UTF-8">
 <title>RightClick Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body{font-family:Roboto;background:#f5f8fb;margin:0}
-header{background:#003366;color:white;text-align:center;padding:15px}
-#jobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;padding:20px}
-.card{background:white;padding:15px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
-button{background:#003366;color:white;border:none;padding:6px 12px;border-radius:6px}
+body{font-family:Arial;background:#eef1f5;margin:0}
+.container{max-width:1100px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
+.logo{text-align:center}
+.logo img{width:130px}
+h2{text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#007bff;color:white}
+select,button{padding:6px}
+button{background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer}
+button:hover{background:#1e7e34}
 </style>
 </head>
+
 <body>
-
-<header>
+<div class="container">
+<div class="logo"><img src="logo.png"></div>
 <h2>RightClick Admin Panel</h2>
-</header>
 
-<div id="jobs"></div>
+<table>
+<thead>
+<tr>
+<th>Job ID</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>Item</th>
+<th>Accessories</th>
+<th>Status</th>
+<th>Change Status</th>
+</tr>
+</thead>
+<tbody id="jobs"></tbody>
+</table>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
  authDomain: "rightclick-service-center.firebaseapp.com",
  projectId: "rightclick-service-center",
+ storageBucket: "rightclick-service-center.firebasestorage.app",
+ messagingSenderId: "558210394752",
+ appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const tbody = document.getElementById("jobs");
 
 async function loadJobs(){
- const container=document.getElementById("jobs");
- container.innerHTML="";
- const snap=await getDocs(collection(db,"jobs"));
- snap.forEach(d=>{
+ const snapshot = await getDocs(collection(db,"jobs"));
+ tbody.innerHTML="";
+ snapshot.forEach(d=>{
   const j=d.data();
-  const div=document.createElement("div");
-  div.className="card";
-  div.innerHTML=`
-   <h4>${j.jobId}</h4>
-   <p>${j.customerName}</p>
-   <p>${j.item}</p>
-   <select id="s-${d.id}">
-    <option ${j.status=="Received"?"selected":""}>Received</option>
-    <option ${j.status=="In Progress"?"selected":""}>In Progress</option>
-    <option ${j.status=="Ready"?"selected":""}>Ready</option>
-    <option ${j.status=="Delivered"?"selected":""}>Delivered</option>
-   </select>
-   <button onclick="updateStatus('${d.id}')">Update</button>
-  `;
-  container.appendChild(div);
+  tbody.innerHTML+=`
+  <tr>
+   <td>${j.jobId}</td>
+   <td>${j.customerName}</td>
+   <td>${j.mobile}</td>
+   <td>${j.item}</td>
+   <td>${j.accessories}</td>
+   <td>${j.status}</td>
+   <td>
+    <select id="s-${d.id}">
+      <option>Received</option>
+      <option>In Progress</option>
+      <option>Ready</option>
+      <option>Delivered</option>
+    </select>
+    <button onclick="updateStatus('${d.id}','${j.mobile}','${j.jobId}')">Update</button>
+   </td>
+  </tr>`;
  });
 }
 
-window.updateStatus = async(id)=>{
- const sel=document.getElementById(`s-${id}`);
- const newStatus=sel.value;
- const ref=doc(db,"jobs",id);
- await updateDoc(ref,{status:newStatus});
- const snap=await getDoc(ref);
- const j=snap.data();
+window.updateStatus = async(id,mobile,jobId)=>{
+ const status=document.getElementById(`s-${id}`).value;
+ await updateDoc(doc(db,"jobs",id),{status});
 
- let number=j.mobile;
- if(!number.startsWith("91")) number="91"+number;
-
- const msg = encodeURIComponent(
+ let num=mobile.startsWith("91")?mobile:"91"+mobile;
+ const time=new Date().toLocaleString();
+ const msg=encodeURIComponent(
 `RightClick Computer Sales & Service Center
-Your device status has been updated.
-Job ID: ${j.jobId}
-Status: ${newStatus}
+Your job status is updated to "${status}"
+Job ID: ${jobId}
+Timestamp: ${time}
 Thank you.`
  );
 
- window.open(`https://wa.me/${number}?text=${msg}`,"_blank");
- alert("Updated & WhatsApp Sent");
+ window.open(`https://wa.me/${num}?text=${msg}`,"_blank");
+ alert("Status Updated & WhatsApp Sent");
  loadJobs();
-}
+};
 
 loadJobs();
 </script>
