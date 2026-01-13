@@ -1,3 +1,4 @@
+<!-- ===================== index.html ===================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,108 +6,124 @@
 <title>RightClick – Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f9;
-  margin: 0;
-  padding: 0;
+body{
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg,#2b5876,#4e4376);
+  margin:0;
+  padding:0;
+  color:#fff;
 }
-.container {
-  max-width: 500px;
-  background: white;
-  margin: 30px auto;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,.1);
+.container{
+  max-width:700px;
+  margin:40px auto;
+  background:#ffffff;
+  color:#333;
+  border-radius:12px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
-.logo {
-  text-align: center;
+.logo{
+  text-align:center;
 }
-.logo img {
-  width: 140px;
+.logo img{
+  max-width:160px;
+  margin-bottom:10px;
 }
-h2 {
-  text-align: center;
-  margin-bottom: 10px;
+h2{
+  text-align:center;
+  margin:10px 0 25px;
 }
-label {
-  font-weight: bold;
+label{
+  font-weight:600;
+  margin-top:12px;
+  display:block;
 }
-input, select, textarea, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  margin-bottom: 15px;
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
 }
-.hidden {
-  display: none;
+button{
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  background:#4e54c8;
+  border:none;
+  border-radius:6px;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
 }
-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+button:hover{
+  background:#565cff;
 }
-button:hover {
-  background: #0056b3;
+.hidden{
+  display:none;
+}
+.success{
+  text-align:center;
+  background:#e8ffe8;
+  color:#006400;
+  padding:15px;
+  border-radius:8px;
+  margin-top:20px;
 }
 </style>
 </head>
-
 <body>
+
 <div class="container">
+  <div class="logo">
+    <img src="logo.png" alt="RightClick Logo">
+  </div>
 
-<div class="logo">
-  <img src="logo.png" alt="RightClick Logo">
-</div>
+  <h2>Job Acknowledgement Form</h2>
 
-<h2>RightClick Computer Sales & Service Center</h2>
-<p style="text-align:center">Customer Job Acknowledgement</p>
+  <label>Customer Name</label>
+  <input type="text" id="customerName" required>
 
-<form id="jobForm">
+  <label>Mobile Number</label>
+  <input type="tel" id="mobile" required>
 
-<label>Customer Name</label>
-<input type="text" id="customerName" required>
+  <label>Item</label>
+  <select id="item">
+    <option value="Laptop">Laptop</option>
+    <option value="Desktop">Desktop</option>
+    <option value="Printer">Printer</option>
+    <option value="Other">Other</option>
+  </select>
 
-<label>Mobile Number</label>
-<input type="tel" id="mobile" required>
+  <input type="text" id="itemOther" class="hidden" placeholder="Enter Item Name">
 
-<label>Item</label>
-<select id="item" onchange="toggleItemOther()" required>
-  <option value="">Select</option>
-  <option>Laptop</option>
-  <option>Desktop / CPU</option>
-  <option>Printer</option>
-  <option>Monitor</option>
-  <option>UPS</option>
-  <option>Other</option>
-</select>
+  <label>Accessories Received</label>
+  <select id="accessories">
+    <option value="Without power cable and adapter">Without power cable and adapter</option>
+    <option value="With Adapter without power cable">With Adapter without power cable</option>
+    <option value="With power cable and adapter">With power cable and adapter</option>
+    <option value="Other">Other</option>
+  </select>
 
-<input type="text" id="itemOther" class="hidden" placeholder="Enter other item">
+  <input type="text" id="accessoriesOther" class="hidden" placeholder="Specify Accessories">
 
-<label>Accessories Received</label>
-<select id="accessories" onchange="toggleAccessoriesOther()" required>
-  <option value="">Select</option>
-  <option>Without power cable and adapter</option>
-  <option>With adapter without power cable</option>
-  <option>With power cable and adapter</option>
-  <option>Other</option>
-</select>
+  <label>Problem Description</label>
+  <textarea id="problem" rows="3"></textarea>
 
-<input type="text" id="accessoriesOther" class="hidden" placeholder="Enter other accessories">
+  <button onclick="submitJob()">Submit & Send WhatsApp</button>
 
-<label>Problem Reported</label>
-<textarea id="problem" rows="3" required></textarea>
-
-<button type="submit">Generate Job & Send WhatsApp</button>
-</form>
+  <div id="successBox" class="success hidden"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, runTransaction, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
@@ -120,64 +137,85 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-function generateJobId() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const da = String(d.getDate()).padStart(2,'0');
-  const rand = Math.floor(1000 + Math.random()*9000);
-  return `RC-${y}${m}${da}-${rand}`;
+const itemSelect = document.getElementById("item");
+const itemOther = document.getElementById("itemOther");
+itemSelect.addEventListener("change",()=>{
+  itemOther.classList.toggle("hidden", itemSelect.value!=="Other");
+});
+
+const accSelect = document.getElementById("accessories");
+const accOther = document.getElementById("accessoriesOther");
+accSelect.addEventListener("change",()=>{
+  accOther.classList.toggle("hidden", accSelect.value!=="Other");
+});
+
+function formatDateID(){
+  const d=new Date();
+  const yyyy=d.getFullYear();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  return `${yyyy}${dd}${mm}`;
 }
 
-window.toggleItemOther = () => {
-  document.getElementById("itemOther").classList.toggle(
-    "hidden",
-    document.getElementById("item").value !== "Other"
-  );
-};
+async function generateJobID(){
+  const today=formatDateID();
+  const counterRef=doc(db,"counters",today);
 
-window.toggleAccessoriesOther = () => {
-  document.getElementById("accessoriesOther").classList.toggle(
-    "hidden",
-    document.getElementById("accessories").value !== "Other"
-  );
-};
+  const jobId = await runTransaction(db, async (transaction)=>{
+    const counterDoc = await transaction.get(counterRef);
+    let count=1;
+    if(counterDoc.exists()){
+      count=counterDoc.data().count+1;
+      transaction.update(counterRef,{count});
+    }else{
+      transaction.set(counterRef,{count:1});
+    }
+    return `${today}-${String(count).padStart(4,'0')}`;
+  });
 
-document.getElementById("jobForm").addEventListener("submit", async e => {
-  e.preventDefault();
+  return jobId;
+}
 
-  const jobId = generateJobId();
-  const timestamp = new Date().toLocaleString();
+window.submitJob = async function(){
+  const name=document.getElementById("customerName").value;
+  const mobile=document.getElementById("mobile").value;
+  let item=itemSelect.value==="Other"?itemOther.value:itemSelect.value;
+  let acc=accSelect.value==="Other"?accOther.value:accSelect.value;
+  const problem=document.getElementById("problem").value;
 
-  const data = {
+  const jobId = await generateJobID();
+
+  const jobData={
     jobId,
-    customerName: customerName.value,
-    mobile: mobile.value,
-    item: item.value === "Other" ? itemOther.value : item.value,
-    accessories: accessories.value === "Other" ? accessoriesOther.value : accessories.value,
-    problem: problem.value,
-    status: "Received",
-    timestamp
+    customerName:name,
+    mobile,
+    item,
+    accessories:acc,
+    problem,
+    status:"Received",
+    createdAt:serverTimestamp()
   };
 
-  await addDoc(collection(db,"jobs"), data);
+  await setDoc(doc(db,"jobs",jobId),jobData);
 
-  let number = mobile.value;
-  if(!number.startsWith("91")) number = "91"+number;
+  const time=new Date().toLocaleTimeString();
 
   const message = encodeURIComponent(
 `RightClick Computer Sales & Service Center
-Your device has been "received" successfully.
+Your device has been "Received" successfully.
 Job ID: ${jobId}
-Timestamp: ${timestamp}
+Timestamp: ${time}
 Thank you.`
   );
 
+  let number=mobile;
+  if(!number.startsWith("91")) number="91"+number;
   window.open(`https://wa.me/${number}?text=${message}`,"_blank");
-  alert("Job Created Successfully!\nJob ID: "+jobId);
-  e.target.reset();
-});
-</script>
 
+  const box=document.getElementById("successBox");
+  box.innerHTML = `Job Created Successfully!<br><b>Job ID:</b> ${jobId}`;
+  box.classList.remove("hidden");
+};
+</script>
 </body>
 </html>
