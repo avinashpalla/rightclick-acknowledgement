@@ -2,79 +2,54 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Check Job Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Check Job Status - RightClick</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f5f8fb; }
-  .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  input { width: 80%; padding: 12px; margin: 20px 0; font-size: 18px; }
-  button { padding: 12px 24px; background: #003366; color: white; border: none; font-size: 18px; }
-  .result { margin-top: 30px; padding: 20px; border-radius: 12px; display: none; }
-  .Received { background: #e7f3ff; }
-  .InProgress { background: #fff3cd; }
-  .Ready { background: #d4edda; color: #155724; }
-  .Delivered { background: #e2e3e5; }
+body{text-align:center;font-family:Arial;background:#f5f8fb;padding:40px}
+.box{background:white;padding:30px;border-radius:12px;max-width:400px;margin:auto}
+input{width:100%;padding:12px;margin:10px 0}
+button{padding:12px;background:#003366;color:white;border:none}
 </style>
 </head>
 <body>
-<div class="container">
-  <h2>RightClick Computer Service</h2>
-  <p>Check Your Device Status</p>
-  <input type="text" id="searchInput" placeholder="Enter Job ID (e.g. RC-1735680000000)">
-  <button onclick="checkStatus()">Check Status</button>
-  <div id="result" class="result"></div>
+
+<div class="box">
+<h2>Check Job Status</h2>
+<input id="jobId" placeholder="Enter Job ID">
+<button onclick="check()">Check</button>
+<div id="result"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const firebaseConfig = { /* same config */ };
+const firebaseConfig = {
+ apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+ authDomain: "rightclick-service-center.firebaseapp.com",
+ projectId: "rightclick-service-center",
+};
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.checkStatus = async () => {
-  const input = document.getElementById("searchInput").value.trim();
-  if (!input) return alert("Enter Job ID");
-  
-  const q = query(collection(db, "jobs"), where("jobId", "==", input));
-  const snapshot = await getDocs(q);
-  
-  const resultDiv = document.getElementById("result");
-  resultDiv.style.display = "block";
-  resultDiv.innerHTML = "";
-  
-  if (snapshot.empty) {
-    resultDiv.innerHTML = "<p>No job found. Please check Job ID.</p>";
-    resultDiv.className = "result";
-    return;
-  }
-  
-  snapshot.forEach(doc => {
-    const job = doc.data();
-    const statusClass = job.status;
-    const statusText = job.status === "InProgress" ? "In Progress" : job.status;
-    
-    let accList = [];
-    if (job.accessories.adapter) accList.push("Adapter");
-    if (job.accessories.cable) accList.push("Power Cable");
-    if (job.accessories.hdmiVga) accList.push("HDMI/VGA Cable");
-    if (job.accessories.other) accList.push(job.accessories.other);
-    const accString = accList.length ? accList.join(", ") : "None";
-    
-    resultDiv.className = `result ${statusClass}`;
-    resultDiv.innerHTML = `
-      <h3>Current Status: <strong>${statusText}</strong></h3>
-      <p><strong>Job ID:</strong> ${job.jobId}</p>
-      <p><strong>Customer:</strong> ${job.customerName}</p>
-      <p><strong>Item:</strong> ${job.item}</p>
-      <p><strong>Problem:</strong> ${job.problem}</p>
-      <p><strong>Accessories:</strong> ${accString}</p>
-      ${job.status === "Ready" ? "<p style='font-size:18px; color:green;'>Your device is ready! Please collect from shop.</p>" : ""}
-      ${job.status === "Delivered" ? "<p style='font-size:18px;'>Thank you! Device delivered.</p>" : ""}
-    `;
-  });
-};
+window.check = async()=>{
+ const id=document.getElementById("jobId").value.trim();
+ const q=query(collection(db,"jobs"),where("jobId","==",id));
+ const snap=await getDocs(q);
+ const res=document.getElementById("result");
+
+ if(snap.empty){res.innerHTML="No Job Found";return;}
+
+ snap.forEach(d=>{
+  const j=d.data();
+  res.innerHTML=`
+   <h3>Status : ${j.status}</h3>
+   <p>Customer : ${j.customerName}</p>
+   <p>Item : ${j.item}</p>
+  `;
+ });
+}
 </script>
 </body>
 </html>
