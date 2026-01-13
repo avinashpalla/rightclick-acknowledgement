@@ -52,6 +52,7 @@ button{
 .hidden{display:none}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -112,7 +113,7 @@ import { getFirestore, doc, runTransaction, collection, addDoc } from "https://w
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
+  projectId: "rightclick-service-center"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -172,8 +173,6 @@ document.getElementById("jobForm").addEventListener("submit", async e=>{
     timestamp: new Date().toLocaleString("en-IN")
   };
 
-  await addDoc(collection(db,"jobs"),data);
-
   const waMsg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 
@@ -182,9 +181,9 @@ Hello ${data.customerName},
 Thank you for choosing RightClick.
 We confirm that your device has been successfully received for service.
 
-────────────────────
+----------------------------------
 Job Acknowledgement
-────────────────────
+----------------------------------
 Job ID      : ${data.jobId}
 Date & Time : ${data.timestamp}
 Mobile      : ${data.mobile}
@@ -197,10 +196,7 @@ ${data.accessories}
 
 Reported Issue:
 ${data.problem}
-────────────────────
-
-Our service team will update you once the diagnosis is complete.
-For any queries, feel free to contact us.
+----------------------------------
 
 Regards,
 RightClick Computer Sales & Service Center`
@@ -209,7 +205,11 @@ RightClick Computer Sales & Service Center`
   let num = data.mobile;
   if(!num.startsWith("91")) num = "91" + num;
 
+  /* OPEN WHATSAPP FIRST (popup-safe) */
   window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
+
+  /* THEN SAVE TO FIRESTORE */
+  await addDoc(collection(db,"jobs"),data);
 
   alert("Job Created Successfully\nJob ID : " + data.jobId);
   e.target.reset();
