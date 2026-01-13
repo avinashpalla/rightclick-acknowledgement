@@ -2,265 +2,111 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>RightClick - Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RightClick Customer Acknowledgement</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- Flatpickr CSS for calendar -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-* { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
-body { background-color: #f5f8fb; color: #333; }
-
-/* Header */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #003366;
-  padding: 20px;
-  color: #fff;
-  flex-wrap: wrap;
-}
-header img { height: 60px; margin-right: 20px; }
-header div { text-align: center; }
-header h1 { margin-bottom: 5px; font-size: 24px; }
-header p { margin: 0; font-size: 16px; color: #ffd700; }
-
-/* Main Form */
-main { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-h2 { text-align: center; margin-bottom: 25px; color: #003366; }
-form label { display: block; margin: 15px 0 5px; font-weight: 500; }
-input[type="text"], input[type="tel"], select, textarea {
-  width: 100%;
-  padding: 12px 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  transition: 0.3s;
-}
-input:focus, select:focus, textarea:focus { border-color: #003366; outline: none; }
-.accessories { display: flex; flex-wrap: wrap; gap: 10px; margin: 5px 0 15px; }
-.accessories label { flex: 1 1 45%; }
-#jobDate { margin-bottom: 20px; }
-
-/* Button centered */
-button { 
-  display: block; 
-  margin: 20px auto 0; 
-  background-color: #003366; 
-  color: #fff; 
-  border: none; 
-  padding: 14px 30px; 
-  border-radius: 8px; 
-  font-size: 16px; 
-  cursor: pointer; 
-  transition:0.3s; 
-}
-button:hover { background-color: #0055aa; }
-
-/* Popup */
-#popup {
-  display: none;
-  position: fixed;
-  top:0; left:0; right:0; bottom:0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-}
-.popup-content {
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 450px;
-  text-align: center;
-  position: relative;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-  animation: fadeIn 0.4s ease;
-}
-.popup-content h3 { color:#003366; margin-bottom:15px; }
-.popup-content p { margin:5px 0; }
-.popup-content .badge { display:inline-block; padding:5px 12px; border-radius:12px; color:#fff; background:#007bff; font-weight:500; margin:10px 0; }
-.popup-content button { margin-top:15px; background-color:#ffd700; color:#003366; font-weight:700; cursor:pointer; }
-.popup-content button:hover { background-color:#ffc107; }
-@keyframes fadeIn { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-
-/* Responsive */
-@media(max-width:500px){ header img { margin-bottom:10px; } header div { text-align:center; } }
+body{font-family:Roboto;background:#f5f8fb;margin:0}
+header{background:#003366;color:white;padding:15px;text-align:center}
+main{max-width:600px;margin:30px auto;background:white;padding:25px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
+label{display:block;margin-top:12px}
+input,select,textarea{width:100%;padding:10px;border-radius:6px;border:1px solid #ccc}
+button{margin-top:20px;padding:12px;background:#003366;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
 
 <header>
-  <img src="logo.png" alt="RightClick Logo">
-  <div>
-    <h1>RightClick Computer Sales & Service Center</h1>
-    <p>Professional Device Service Management</p>
-  </div>
+<h2>RightClick Computer Sales & Service Center</h2>
+<p>Customer Acknowledgement</p>
 </header>
 
 <main>
-<h2>Customer Job Acknowledgement</h2>
-
 <form id="jobForm">
+<label>Job Date</label>
+<input type="text" id="jobDate" required>
 
-  <!-- Date at top -->
-  <label for="jobDate">Job Date</label>
-  <input type="text" id="jobDate" placeholder="Click to select date" required>
+<label>Customer Name</label>
+<input type="text" id="customerName" required>
 
-  <label for="customerName">Customer Name</label>
-  <input type="text" id="customerName" required>
+<label>Mobile Number</label>
+<input type="tel" id="mobile" required>
 
-  <label for="mobile">Mobile Number</label>
-  <input type="tel" id="mobile" required>
+<label>Item</label>
+<select id="item">
+<option>Laptop</option>
+<option>Desktop / CPU</option>
+<option>Printer</option>
+<option>Monitor</option>
+<option>UPS</option>
+<option>Other</option>
+</select>
 
-  <label for="item">Item Submitted</label>
-  <select id="item">
-    <option>Laptop</option>
-    <option>Desktop / CPU</option>
-    <option>Printer</option>
-    <option>Monitor</option>
-    <option>UPS</option>
-    <option>Other</option>
-  </select>
+<label>Problem</label>
+<textarea id="problem"></textarea>
 
-  <h4>Accessories Received</h4>
-  <div class="accessories">
-    <label><input type="checkbox" id="adapter"> Adapter</label>
-    <label><input type="checkbox" id="power"> Power Cable</label>
-    <label><input type="checkbox" id="hdmi"> HDMI / VGA Cable</label>
-    <label><input type="checkbox" id="mouse"> Mouse</label>
-    <label><input type="checkbox" id="keyboard"> Keyboard</label>
-  </div>
-
-  <label for="otherItems">Other Items (if any)</label>
-  <input type="text" id="otherItems">
-
-  <label for="problem">Problem Reported</label>
-  <textarea id="problem" rows="4"></textarea>
-
-  <button type="submit">Generate Acknowledgement</button>
+<button type="submit">Create Job</button>
 </form>
 </main>
 
-<!-- Popup -->
-<div id="popup">
-  <div class="popup-content">
-    <img src="logo.png" alt="Logo" style="height:50px; margin-bottom:10px;">
-    <h3>Acknowledgement Created!</h3>
-    <p><strong>Job ID:</strong> <span id="popupJobId"></span></p>
-    <p><strong>Customer:</strong> <span id="popupCustomer"></span></p>
-    <p><strong>Item:</strong> <span id="popupItem"></span></p>
-    <p><strong>Date:</strong> <span id="popupDate"></span></p>
-    <p><strong>Timestamp:</strong> <span id="popupTimestamp"></span></p>
-    <span class="badge">Received</span>
-    <br>
-    <button onclick="printReceipt()">Print Acknowledgement</button>
-    <button onclick="closePopup()" style="margin-left:10px;">Close</button>
-  </div>
-</div>
-
-<!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
-  authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+ apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+ authDomain: "rightclick-service-center.firebaseapp.com",
+ projectId: "rightclick-service-center",
+ storageBucket: "rightclick-service-center.firebasestorage.app",
+ messagingSenderId: "558210394752",
+ appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const form = document.getElementById("jobForm");
-const popup = document.getElementById("popup");
-const popupJobId = document.getElementById("popupJobId");
-const popupCustomer = document.getElementById("popupCustomer");
-const popupItem = document.getElementById("popupItem");
-const popupDate = document.getElementById("popupDate");
-const popupTimestamp = document.getElementById("popupTimestamp");
+flatpickr("#jobDate",{dateFormat:"d-m-Y",defaultDate:"today"});
 
-// Flatpickr calendar
-flatpickr("#jobDate", {
-    dateFormat: "d-m-Y",
-    defaultDate: "today",
-    altInput: true,
-    altFormat: "F j, Y",
-    allowInput: true
-});
+document.getElementById("jobForm").addEventListener("submit",async(e)=>{
+ e.preventDefault();
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+ const dateObj = new Date();
+ const dateStr = dateObj.toISOString().slice(0,10).replace(/-/g,"");
+ const rand = Math.floor(1000+Math.random()*9000);
+ const jobId = `RC-${dateStr}-${rand}`;
+ const timestamp = dateObj.toLocaleString("en-IN");
 
-  const now = new Date();
-  const timestamp = now.toLocaleString("en-IN", { hour12: false });
+ const data = {
+  jobId,
+  customerName:customerName.value,
+  mobile:mobile.value,
+  item:item.value,
+  problem:problem.value,
+  status:"Received",
+  date:jobDate.value,
+  timestamp,
+  createdAt:serverTimestamp()
+ };
 
-  const jobData = {
-    customerName: document.getElementById("customerName").value,
-    mobile: document.getElementById("mobile").value,
-    item: document.getElementById("item").value,
-    accessories: {
-      adapter: document.getElementById("adapter").checked,
-      power: document.getElementById("power").checked,
-      hdmi: document.getElementById("hdmi").checked,
-      mouse: document.getElementById("mouse").checked,
-      keyboard: document.getElementById("keyboard").checked
-    },
-    otherItems: document.getElementById("otherItems").value,
-    problem: document.getElementById("problem").value,
-    status: "Received",
-    date: document.getElementById("jobDate").value,
-    timestamp: timestamp,
-    jobId: "RC-" + Math.floor(Math.random()*90000+10000)
-  };
+ await addDoc(collection(db,"jobs"),data);
 
-  await addDoc(collection(db, "jobs"), jobData);
+ let number = mobile.value.trim();
+ if(!number.startsWith("91")) number="91"+number;
 
-  popupJobId.innerText = jobData.jobId;
-  popupCustomer.innerText = jobData.customerName;
-  popupItem.innerText = jobData.item;
-  popupDate.innerText = jobData.date;
-  popupTimestamp.innerText = jobData.timestamp;
-  popup.style.display = "flex";
-  form.reset();
-
-  // WhatsApp auto-send
-  let customerNumber = jobData.mobile.trim();
-  if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber;
-  const message = encodeURIComponent(
+ const msg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
-Your device has been received successfully.
-Job ID: ${jobData.jobId}
-Customer: ${jobData.customerName}
-Item: ${jobData.item}
-Date: ${jobData.date}
-Timestamp: ${jobData.timestamp}
-Status: Received
-Thank you for choosing us!`
-  );
-  const whatsappUrl = `https://wa.me/${customerNumber}?text=${message}`;
-  window.open(whatsappUrl, "_blank");
+Your device has been "received" successfully.
+Job ID: ${jobId}
+Timestamp: ${timestamp}
+Thank you.`
+ );
+
+ window.open(`https://wa.me/${number}?text=${msg}`,"_blank");
+ alert("Job Created : "+jobId);
+ document.getElementById("jobForm").reset();
 });
-
-function closePopup() { popup.style.display = "none"; }
-function printReceipt() {
-  const printContent = popup.querySelector(".popup-content").innerHTML;
-  const newWin = window.open('', '', 'width=500,height=600');
-  newWin.document.write('<html><head><title>Print Acknowledgement</title></head><body>'+printContent+'</body></html>');
-  newWin.document.close();
-  newWin.focus();
-  newWin.print();
-  newWin.close();
-}
 </script>
-
 </body>
 </html>
