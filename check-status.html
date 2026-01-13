@@ -2,54 +2,72 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Check Job Status</title>
+<title>Check Job Status - RightClick</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body{text-align:center;font-family:Arial;background:#f5f8fb;padding:40px}
-.box{background:white;padding:30px;border-radius:12px;max-width:400px;margin:auto}
-input{width:100%;padding:12px;margin:10px 0}
-button{padding:12px;background:#003366;color:white;border:none}
+body{font-family:Arial;background:#f4f6f9;margin:0}
+.container{max-width:450px;margin:30px auto;background:#fff;padding:20px;border-radius:10px;text-align:center}
+.logo img{width:120px}
+input,button{width:100%;padding:10px;margin:10px 0}
+button{background:#007bff;color:white;border:none;border-radius:5px}
+.result{margin-top:15px;font-size:15px}
 </style>
 </head>
-<body>
 
-<div class="box">
-<h2>Check Job Status</h2>
-<input id="jobId" placeholder="Enter Job ID">
-<button onclick="check()">Check</button>
-<div id="result"></div>
+<body>
+<div class="container">
+<div class="logo"><img src="logo.png"></div>
+<h3>Check Your Job Status</h3>
+
+<input type="text" id="jobId" placeholder="Enter Job ID">
+<button onclick="checkStatus()">Check</button>
+
+<div class="result" id="result"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
  authDomain: "rightclick-service-center.firebaseapp.com",
  projectId: "rightclick-service-center",
+ storageBucket: "rightclick-service-center.firebasestorage.app",
+ messagingSenderId: "558210394752",
+ appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.check = async()=>{
+window.checkStatus = async()=>{
  const id=document.getElementById("jobId").value.trim();
- const q=query(collection(db,"jobs"),where("jobId","==",id));
- const snap=await getDocs(q);
  const res=document.getElementById("result");
-
- if(snap.empty){res.innerHTML="No Job Found";return;}
+ res.innerHTML="Searching...";
+ const snap=await getDocs(collection(db,"jobs"));
+ let found=false;
 
  snap.forEach(d=>{
   const j=d.data();
-  res.innerHTML=`
-   <h3>Status : ${j.status}</h3>
-   <p>Customer : ${j.customerName}</p>
-   <p>Item : ${j.item}</p>
-  `;
+  if(j.jobId===id){
+    found=true;
+    res.innerHTML=`
+    <b>Customer:</b> ${j.customerName}<br>
+    <b>Status:</b> ${j.status}<br>
+    <b>Item:</b> ${j.item}<br>
+    <b>Accessories:</b> ${j.accessories}<br>
+    <b>Updated:</b> ${j.timestamp}
+    `;
+  }
  });
-}
+
+ if(!found){
+   res.innerHTML="❌ Job ID not found. Please check again.";
+ }
+};
 </script>
 </body>
 </html>
