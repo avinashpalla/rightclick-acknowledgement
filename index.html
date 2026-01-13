@@ -13,7 +13,7 @@
 body{background:#eef2f6}
 header{background:#002b55;color:white;display:flex;align-items:center;gap:15px;padding:12px}
 header img{height:55px}
-main{max-width:800px;margin:30px auto;background:white;padding:25px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
+main{max-width:750px;margin:30px auto;background:white;padding:25px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
 h2{text-align:center;margin-bottom:15px;color:#002b55}
 
 label{margin-top:12px;display:block;font-weight:500}
@@ -46,7 +46,7 @@ button{
   padding:25px;
   border-radius:12px;
   width:90%;
-  max-width:420px;
+  max-width:400px;
   text-align:center;
 }
 </style>
@@ -112,10 +112,7 @@ button{
     <img src="logo.png" height="50"><br><br>
     <h3>Job Created Successfully</h3>
     <p><b>Job ID:</b> <span id="pJobId"></span></p>
-    <p><b>Customer:</b> <span id="pCustomer"></span></p>
-    <p><b>Mobile:</b> <span id="pMobile"></span></p>
     <p><b>Item:</b> <span id="pItem"></span></p>
-    <p><b>Accessories:</b> <span id="pAccessories"></span></p>
     <p>Status: <b>Received</b></p>
     <button onclick="closePopup()">Close</button>
   </div>
@@ -151,7 +148,7 @@ accessoriesType.addEventListener("change",()=>{
   accessoriesOther.classList.toggle("hidden", accessoriesType.value !== "Other");
 });
 
-// Job ID generator: YYYYDDMM-0001
+// Safe Job ID generator (no page duplication)
 async function generateJobId(){
   const d = new Date();
   const datePart = d.getFullYear() + String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0');
@@ -169,7 +166,7 @@ async function generateJobId(){
   return `${datePart}-${String(num).padStart(4,"0")}`;
 }
 
-// Prevent double submit
+// Prevent double submission
 let submitting = false;
 
 jobForm.addEventListener("submit", async (e)=>{
@@ -197,46 +194,21 @@ jobForm.addEventListener("submit", async (e)=>{
 
   await addDoc(collection(db,"jobs"),jobData);
 
-  // Professional WhatsApp Message
   let mobileNo = mobile.value;
   if(!mobileNo.startsWith("91")) mobileNo = "91"+mobileNo;
 
   const msg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
-
-Hello ${jobData.customerName},
-
-Your device has been successfully RECEIVED. Please find your job acknowledgement details below:
-
---------------------------------
-Job ID        : ${jobId}
-Date & Time   : ${time}
-Customer Name : ${jobData.customerName}
-Mobile Number : ${jobData.mobile}
-
-Device Type   : ${jobData.itemCategory}
-Device Name   : ${jobData.itemName}
-
-Accessories   : ${jobData.accessories}
-
-Problem Noted :
-${jobData.problem || "Not specified"}
---------------------------------
-
-Kindly keep this message for future reference.
-Thank you for choosing RightClick Computer Sales & Service Center.
-`
+Your device has been "received" successfully.
+Job ID: ${jobId}
+Timestamp: ${time}
+Thank you.`
   );
 
   window.open(`https://wa.me/${mobileNo}?text=${msg}`,"_blank");
 
-  // Popup details
   pJobId.innerText = jobId;
-  pCustomer.innerText = jobData.customerName;
-  pMobile.innerText = jobData.mobile;
-  pItem.innerText = jobData.itemName;
-  pAccessories.innerText = jobData.accessories;
-
+  pItem.innerText = itemName.value;
   popup.style.display="flex";
 
   jobForm.reset();
