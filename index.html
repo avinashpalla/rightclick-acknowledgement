@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <title>RightClick Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <style>
 *{box-sizing:border-box;font-family:'Roboto',sans-serif}
 body{margin:0;background:#f5f8fb}
@@ -21,6 +23,7 @@ header img{
 }
 header h1{color:#fff;font-size:20px;margin:0}
 header p{color:#ffd700;margin:4px 0 0}
+
 main{
   max-width:520px;
   margin:20px auto;
@@ -29,6 +32,7 @@ main{
   border-radius:14px;
   box-shadow:0 4px 14px rgba(0,0,0,.1);
 }
+
 label{font-weight:500;margin-top:14px;display:block}
 input,select,textarea{
   width:100%;
@@ -38,6 +42,7 @@ input,select,textarea{
   border:1px solid #ccc;
   font-size:15px;
 }
+
 button{
   width:100%;
   margin-top:20px;
@@ -49,6 +54,7 @@ button{
   font-size:17px;
   font-weight:600;
 }
+
 .hidden{display:none}
 </style>
 </head>
@@ -108,55 +114,41 @@ button{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, doc, runTransaction, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center"
+  projectId: "rightclick-service-center",
+  storageBucket: "rightclick-service-center.firebasestorage.app",
+  messagingSenderId: "558210394752",
+  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-flatpickr("#jobDate",{dateFormat:"d/m/Y",defaultDate:"today"});
+flatpickr("#jobDate", { dateFormat:"d/m/Y", defaultDate:"today" });
 
 const item = document.getElementById("item");
 const deviceLabel = document.getElementById("deviceLabel");
 const accessories = document.getElementById("accessories");
 const accessoriesOther = document.getElementById("accessoriesOther");
 
-item.onchange = ()=>{
+item.onchange = () => {
   deviceLabel.innerText = item.value ? item.value + " Name" : "Device Name";
 };
 
-accessories.onchange = ()=>{
+accessories.onchange = () => {
   accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
 };
 
-document.getElementById("jobForm").addEventListener("submit", async e=>{
+document.getElementById("jobForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const today = new Date();
-  const dateKey =
-    today.getFullYear().toString() +
-    String(today.getMonth()+1).padStart(2,'0') +
-    String(today.getDate()).padStart(2,'0');
+  const jobId = "RC-" + Date.now();
 
-  const counterRef = doc(db,"counters","jobs");
-
-  const jobId = await runTransaction(db, async tx=>{
-    const snap = await tx.get(counterRef);
-    let seq = 1;
-    if(snap.exists() && snap.data().date === dateKey){
-      seq = snap.data().seq + 1;
-    }
-    tx.set(counterRef,{date:dateKey,seq});
-    return dateKey + String(seq).padStart(4,"0");
-  });
-
-  const accFinal =
-    accessories.value === "Other"
+  const accFinal = accessories.value === "Other"
       ? accessoriesOther.value
       : accessories.value;
 
@@ -173,45 +165,35 @@ document.getElementById("jobForm").addEventListener("submit", async e=>{
     timestamp: new Date().toLocaleString("en-IN")
   };
 
+  // Save to Firestore
+  await addDoc(collection(db, "jobs"), data);
+
+  // WhatsApp Message
   const waMsg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
-
 Hello ${data.customerName},
 
-Thank you for choosing RightClick.
-We confirm that your device has been successfully received for service.
+Your device has been successfully received.
 
-----------------------------------
-Job Acknowledgement
-----------------------------------
-Job ID      : ${data.jobId}
+Job ID : ${data.jobId}
 Date & Time : ${data.timestamp}
-Mobile      : ${data.mobile}
-
-Device Type : ${data.item}
+Mobile : ${data.mobile}
+Device : ${data.item}
 ${data.item} Name : ${data.deviceName}
+Accessories : ${data.accessories}
 
-Accessories Received:
-${data.accessories}
-
-Reported Issue:
+Problem:
 ${data.problem}
-----------------------------------
 
-Regards,
-RightClick Computer Sales & Service Center`
+Thank you for choosing RightClick.`
   );
 
   let num = data.mobile;
   if(!num.startsWith("91")) num = "91" + num;
 
-  /* OPEN WHATSAPP FIRST (popup-safe) */
-  window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
+  window.open(`https://wa.me/${num}?text=${waMsg}`, "_blank");
 
-  /* THEN SAVE TO FIRESTORE */
-  await addDoc(collection(db,"jobs"),data);
-
-  alert("Job Created Successfully\nJob ID : " + data.jobId);
+  alert("Job Created Successfully!\nJob ID : " + data.jobId);
   e.target.reset();
 });
 </script>
